@@ -3,7 +3,7 @@
 ReactTaggableField is a react component that allows for inlining tag labels in a text input field. It supports multiple tag sets triggered by a configured character. `onChange` will return an object with text, html and inlined tags.
 
 ## Demo
-![](react-taggable-field-demo.gif)
+![](src/react-taggable-field-demo.gif)
 
 ### Getting started
 ```

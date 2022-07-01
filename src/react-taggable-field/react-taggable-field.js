@@ -1,13 +1,20 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import './ReactTaggableField.css'
 
-const createEl = ({ elType = 'div', text = '', __html, contentEditable = true, className = ''}) => {
+const createEl = ({
+	elType = 'div',
+	text = '',
+	__html,
+	contentEditable = true,
+	className = ''
+}) => {
 	const el = document.createElement(elType)
 	el.className = className
 	el.innerText = text
 	if (__html) {
 		el.innerHTML = __html
 	}
+
 	el.setAttribute('contenteditable', contentEditable)
 	return el
 }
@@ -56,6 +63,7 @@ export default function TaggableInput({ tags, onChange, autoFocus = false }) {
 		// remove highlighted node and replace with tag node
 		inputRef.current.removeChild(lastNode)
 		inputRef.current.appendChild(tagNode)
+
 		inputRef.current.appendChild(document.createTextNode('\u00A0')) // add white space at end
 		setShowSuggestions(false)
 	}, [addedTags, tags])
@@ -82,11 +90,11 @@ export default function TaggableInput({ tags, onChange, autoFocus = false }) {
 
 			if (e.key === 'Tab' || e.key === ' ' || e.key === 'Enter') {
 				const lastNode = inputRef.current.childNodes[inputRef.current.childNodes.length - 1]
-				const nodeText = lastNode.innerText.replace(triggerSymbol.current, '').toLowerCase()
+				const nodeText = lastNode.innerText?.replace(triggerSymbol.current, '').toLowerCase() || ''
 				if ((matches.current.length === 1 && isMatching.current) || matches.current.includes(nodeText)) {
 					const tag = matches.current.length === 1 ? matches.current[0] : nodeText
 					addInputTag(tag)
-				} else if (lastNode.nodeName !== '#text' && lastNode?.classList.contains(baseHighlightClass) && matches.current.length === 0) {
+				} else if (lastNode.nodeName !== '#text' && lastNode.classList?.contains(baseHighlightClass) && matches.current.length === 0) {
 					removeHighlight(lastNode)
 					if (e.key !== ' ') inputRef.current.appendChild(document.createTextNode('\u00A0'))
 					e.preventDefault()
@@ -108,22 +116,37 @@ export default function TaggableInput({ tags, onChange, autoFocus = false }) {
 			}
 		}
     const keyDownListener = (e) => {
+			removeBreaks(inputRef.current)
+
 			if (e.key === 'Enter' || e.key === 'Tab') e.preventDefault()
       if (e.key === 'Backspace') {
 				const lastNode = inputRef.current.childNodes[inputRef.current.childNodes.length - 1]
-
-				// Remove any necessary tags from memory
+				const lastElement = inputRef.current.children[inputRef.current.children.length - 1]
+			
 				if (heldKeys.current.slice(-1)[0] === 'Meta') {
+					// remove everything
 					addedTags.current = []
-				} else if (lastNode?.classList.contains(baseInputTagClass)) {
-					// remove the 
+					inputRef.current.innerHTML = ''
+					return
+				} else if (
+					lastNode.nodeValue === '\u00A0' && (
+						lastNode.classList?.contains(baseInputTagClass) ||
+						lastElement.classList?.contains(baseInputTagClass)
+					)
+				) {
+					// remove the tag
 					addedTags.current.pop()
+					inputRef.current.removeChild(lastNode)
+					inputRef.current.removeChild(lastElement)
+					e.preventDefault()
+					return
 				}
-				removeBreaks(inputRef.current)
+
 				if (
-					lastNode?.classList.contains(baseInputTagClass) ||
+					lastNode.classList?.contains(baseInputTagClass) ||
 					(lastNode === highlightEl.current && lastNode.innerText === triggerSymbol.current) ||
-					heldKeys.current.slice(-1)[0] === 'Meta' // command backspace
+					heldKeys.current.slice(-1)[0] === 'Alt' ||
+					heldKeys.current.slice(-1)[0] === 'Control'
 				) {
 					inputRef.current.removeChild(lastNode)
 					highlightEl.current = null

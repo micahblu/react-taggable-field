@@ -1,11 +1,37 @@
 .App {
-  max-width: 800px;
+  max-width: 75%;
   margin: auto;
 }
 
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.input-container {
+  margin: 1rem;
+  margin-left: 0;
+}
+
+.demo-output {
+  display: grid;
+  grid-template-columns: 50px auto;
+  background: #333;
+  color: #f2f2f2;
+  margin: 1rem;
+  padding: 1rem;
+  gap: 10px;
+}
+
+.demo-output textarea {
+  min-height: 100px;
+}
+
 .peopleTag {
-  background-color: blue;
-  color: white;
+  color: blue;
+  background-color: transparent;
+  padding: 0;
 }
 
 .thingTag {

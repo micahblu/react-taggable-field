@@ -10,7 +10,7 @@
   border: 1px solid #ccc;
   border-radius: 5px;
   text-align: left;
-  display: inline-block;
+  display: block;
   align-items: center;
   white-space: nowrap;
 }
@@ -40,4 +40,5 @@
   color: white;
   padding: 0 5px;
   border-radius: 5px;
+  display: inline-block;
 }

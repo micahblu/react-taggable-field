@@ -1,0 +1,44 @@
+
+.react-taggable-highlight {
+  color: blue;
+}
+
+.input {
+  width: 100%;
+	min-height: 1rem;
+  padding: 0.4rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  text-align: left;
+  display: inline-block;
+  align-items: center;
+  white-space: nowrap;
+  /* visibility: hidden; */
+}
+
+@keyframes cursor-blink {
+  0% {
+    opacity: 0;
+  }
+}
+
+.suggestedTags {
+  display: grid;
+  text-align: left;
+}
+
+.suggestedTag {
+  padding: 8px;
+	cursor: pointer;
+}
+
+.suggestedTag:hover {
+	background: #f2f2f2;
+}
+
+.react-taggable-input-tag {
+  background: #333;
+  color: white;
+  padding: 0 5px;
+  border-radius: 5px;
+}

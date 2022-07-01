@@ -13,7 +13,6 @@
   display: inline-block;
   align-items: center;
   white-space: nowrap;
-  /* visibility: hidden; */
 }
 
 @keyframes cursor-blink {

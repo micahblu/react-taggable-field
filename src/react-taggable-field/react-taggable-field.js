@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import './ReactTaggable.css'
+import './ReactTaggableField.css'
 
 const createEl = ({ elType = 'div', text = '', __html, contentEditable = true, className = ''}) => {
 	const el = document.createElement(elType)

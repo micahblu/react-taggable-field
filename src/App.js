@@ -1,13 +1,13 @@
-import ReactTaggable from './react-taggable'
+import ReactTaggableField from './react-taggable-field'
 import './App.css'
 
 function App() {
   return (
     <div className='App'>
       <header className='App-header'>
-        <h1>React Taggable</h1>
+        <h1>React Taggable Field</h1>
       </header>
-      <ReactTaggable
+      <ReactTaggableField
         autoFocus={true}
         onChange={({ text, __html, tags}) => {
           console.log('text', text)

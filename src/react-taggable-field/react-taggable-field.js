@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import './ReactTaggableField.css'
 
 const createEl = ({ elType = 'div', text = '', __html, contentEditable = true, className = ''}) => {
@@ -38,7 +38,7 @@ export default function TaggableInput({ tags, onChange, autoFocus = false }) {
 	const baseInputTagClass = 'react-taggable-input-tag'
 	const matches = useRef([])
 
-	const addInputTag = (tagName) => {
+	const addInputTag = useCallback((tagName) => {
 		addedTags.current.push({ symbol: triggerSymbol.current, name: tagName })
 		const lastNode = inputRef.current.childNodes[inputRef.current.childNodes.length - 1]
 		const tagNode = createEl({
@@ -58,7 +58,7 @@ export default function TaggableInput({ tags, onChange, autoFocus = false }) {
 		inputRef.current.appendChild(tagNode)
 		inputRef.current.appendChild(document.createTextNode('\u00A0')) // add white space at end
 		setShowSuggestions(false)
-	}
+	}, [addedTags, tags])
 
 	const removeHighlight = (lastNode) => {
 		const lastNodeText = lastNode.innerText
@@ -168,7 +168,7 @@ export default function TaggableInput({ tags, onChange, autoFocus = false }) {
       document.removeEventListener('keydown', keyDownListener)
       document.removeEventListener('keyup', keyUpListener)
     }
-  }, [])
+  }, [addInputTag, tags, triggers, onChange, suggestionMap])
 	
 	useEffect(() => {
 		if (inputRef.current) {
@@ -200,7 +200,7 @@ export default function TaggableInput({ tags, onChange, autoFocus = false }) {
 			// Remove observer on unmount
 			return () => observer.disconnect()
 		}
-	}, [inputRef])
+	}, [inputRef, addInputTag, autoFocus])
 
   return (
     <div className='taggable'>

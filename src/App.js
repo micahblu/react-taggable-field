@@ -25,7 +25,7 @@ function App() {
           tagClass: 'thingTag',
           suggestions: [
             'hobby',
-            's6',
+            'cool',
             'motuslist',
             'family',
             'study',
@@ -40,6 +40,8 @@ function App() {
           tagClass: 'peopleTag',
           suggestions: [
             'Albert Einstein',
+            'Richard Feynman',
+            'Nikola Tesla',
             'Kurdt Cobain',
             'Mike Tyson',
             'Michael Jordan',

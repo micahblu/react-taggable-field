@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import './ReactTaggableField.css'
 
 const createEl = ({
@@ -26,7 +26,7 @@ const removeBreaks = (el) => {
 	}
 }
 
-export default function TaggableInput({ tags, onChange, autoFocus = false }) {
+export default function ReactTaggableField({ tags, onChange, autoFocus = false }) {
   const inputRef = useRef()
 	const isMatching = useRef(false)
 	const highlightEl = useRef(null)

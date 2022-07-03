@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect, useRef, useCallback, defaultValue } from 'react'
+import React, { useState, useLayoutEffect, useRef, useCallback } from 'react'
 import './ReactTaggableField.css'
 
 const createEl = ({

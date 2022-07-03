@@ -6,6 +6,22 @@ function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'defau
 
 var React__default = /*#__PURE__*/_interopDefaultLegacy(React);
 
+const removeBreaks = el => {
+  const nodes = el.getElementsByTagName('br');
+
+  for (let i = 0; i < nodes.length; i++) {
+    nodes[i].parentNode.removeChild(nodes[i]);
+  }
+};
+const getLastElement = parentEl => {
+  const len = parentEl.childNodes.length - 1;
+
+  for (let i = len; i >= 0; i--) {
+    const currentEl = parentEl.childNodes[i];
+    if (currentEl.nodeName !== '#text') return currentEl;
+  }
+};
+
 function styleInject(css, ref) {
   if ( ref === void 0 ) ref = {};
   var insertAt = ref.insertAt;
@@ -36,23 +52,6 @@ function styleInject(css, ref) {
 var css_248z = "react-taggable-field-container{position:relative}.react-taggable-highlight{color:blue}.react-taggable-field-input{align-items:center;border:1px solid #ccc;border-radius:5px;display:block;min-height:1rem;padding:.4rem;text-align:left;white-space:nowrap;width:100%}.react-taggable-field-suggested-tags{background-color:#fff;border:1px solid #ccc;border-radius:5px;display:grid;min-width:300px;position:absolute;text-align:left;width:fit-content;z-index:1}.react-taggable-field-suggested-tag{cursor:pointer;padding:8px}.react-taggable-field-suggested-tag:hover{background:#f2f2f2}.react-taggable-field-input-tag{background:#333;border-radius:5px;color:#fff;display:inline-block;padding:0 5px}";
 styleInject(css_248z);
 
-const removeBreaks = el => {
-  const nodes = el.getElementsByTagName('br');
-
-  for (let i = 0; i < nodes.length; i++) {
-    nodes[i].parentNode.removeChild(nodes[i]);
-  }
-};
-
-const getLastElement = parentEl => {
-  const len = parentEl.childNodes.length - 1;
-
-  for (let i = len; i >= 0; i--) {
-    const currentEl = parentEl.childNodes[i];
-    if (currentEl.nodeName !== '#text') return currentEl;
-  }
-};
-
 function ReactTaggableField({
   tags,
   onChange,
@@ -60,7 +59,8 @@ function ReactTaggableField({
   defaultValue,
   disabled = false,
   inputClass,
-  suggestionClass
+  suggestionClass,
+  onSubmit
 }) {
   const inputRef = React.useRef();
   const isMatching = React.useRef(false);
@@ -145,7 +145,7 @@ function ReactTaggableField({
     }
   }, [disabled]);
   React.useLayoutEffect(() => {
-    if (defaultValue) {
+    if (defaultValue !== undefined) {
       inputRef.current.innerHTML = defaultValue;
       autoPositionCaret();
     }
@@ -167,6 +167,16 @@ function ReactTaggableField({
           if (e.key !== ' ') inputRef.current.appendChild(document.createTextNode('\u00A0'));
           autoPositionCaret();
           e.preventDefault();
+        } else if (e.key === 'Enter') {
+          onSubmit({
+            text: inputRef.current.innerText,
+            __html: inputRef.current.innerHTML,
+            tags: addedTags.current
+          }, () => {
+            // clear method
+            inputRef.current.innerHTML = '';
+            addedTags.current = [];
+          });
         }
       }
 

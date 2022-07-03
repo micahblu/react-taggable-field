@@ -21,8 +21,6 @@
     "@storybook/react": "^6.5.9",
     "@storybook/testing-library": "^0.0.13",
     "babel-loader": "^8.2.5",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "rollup": "^2.75.7",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
@@ -44,6 +42,6 @@
   "scripts": {
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
-    "build-lib": "rollup -c"
+    "build": "rollup -c"
   }
 }

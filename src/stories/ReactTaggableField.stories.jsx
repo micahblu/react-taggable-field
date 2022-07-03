@@ -14,13 +14,17 @@ stories.add('ReactTaggableField', () => {
 			</header>
 			<div className='container'>
 				<div className='input-container'>
-
 					<ReactTaggableField
 						autoFocus={true}
 						onChange={({ text, __html, tags}) => {
 							setOutput({ text, __html, tags })
 						}}
-						defaultValue='Hello World'
+						defaultValue={'Hello world'}
+						onSubmit={(output, clear) => {
+							// do something and clear the input
+							setOutput({})
+							clear()
+						}}
 						inputClass='demo-input'
 						tags={[{
 							triggerSymbol: '#',

@@ -1,20 +1,6 @@
 import React, { useState, useLayoutEffect, useRef, useCallback } from 'react'
+import { removeBreaks, getLastElement } from './helpers'
 import './ReactTaggableField.css'
-
-const removeBreaks = (el) => {
-	const nodes = el.getElementsByTagName('br')
-	for (let i = 0; i < nodes.length; i++) {
-		nodes[i].parentNode.removeChild(nodes[i])
-	}
-}
-
-const getLastElement = (parentEl) => {
-	const len = parentEl.childNodes.length - 1
-	for (let i = len; i >= 0; i--) {
-		const currentEl = parentEl.childNodes[i]
-		if (currentEl.nodeName !== '#text') return currentEl
-	}
-}
 
 export default function ReactTaggableField({
 	tags,
@@ -23,10 +9,11 @@ export default function ReactTaggableField({
 	defaultValue,
 	disabled = false,
 	inputClass,
-	suggestionClass
+	suggestionClass,
+	onSubmit
 }) {
   const inputRef = useRef()
-	const isMatching = useRef(false)
+	const isMatching = useRef(false) 
 	const highlightEl = useRef(null)
 	const triggerSymbol = useRef()
 	const addedTags = useRef([])
@@ -112,7 +99,7 @@ export default function ReactTaggableField({
 	}, [disabled])
 
 	useLayoutEffect(() => {
-		if (defaultValue) {
+		if (defaultValue !== undefined) {
 			inputRef.current.innerHTML = defaultValue
 			autoPositionCaret()
 		}
@@ -134,6 +121,16 @@ export default function ReactTaggableField({
 					if (e.key !== ' ') inputRef.current.appendChild(document.createTextNode('\u00A0'))
 					autoPositionCaret()
 					e.preventDefault()
+				} else if (e.key === 'Enter') {
+					onSubmit({
+						text: inputRef.current.innerText,
+						__html: inputRef.current.innerHTML,
+						tags: addedTags.current
+					}, () => {
+						// clear method
+						inputRef.current.innerHTML = ''
+						addedTags.current = []
+					})
 				}
       }
 			if (isMatching.current && e.key !== triggerSymbol.current) {

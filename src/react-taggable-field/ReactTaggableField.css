@@ -15,12 +15,6 @@
   white-space: nowrap;
 }
 
-@keyframes cursor-blink {
-  0% {
-    opacity: 0;
-  }
-}
-
 .suggestedTags {
   display: grid;
   text-align: left;

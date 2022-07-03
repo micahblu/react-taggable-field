@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useLayoutEffect, useRef, useCallback, defaultValue } from 'react'
 import './ReactTaggableField.css'
 
 const createEl = ({
@@ -26,7 +26,7 @@ const removeBreaks = (el) => {
 	}
 }
 
-export default function ReactTaggableField({ tags, onChange, autoFocus = false }) {
+export default function ReactTaggableField({ tags, onChange, autoFocus = false, defaultValue, disabled = false }) {
   const inputRef = useRef()
 	const isMatching = useRef(false)
 	const highlightEl = useRef(null)
@@ -44,6 +44,17 @@ export default function ReactTaggableField({ tags, onChange, autoFocus = false }
 	const baseHighlightClass = 'react-taggable-highlight'
 	const baseInputTagClass = 'react-taggable-input-tag'
 	const matches = useRef([])
+
+	const autoPositionCaret = () => {
+		const selection = window.getSelection()
+		if (highlightEl.current) {
+			highlightEl.current.focus()
+			selection.collapse(highlightEl.current, highlightEl.current.childNodes.length)
+		} else {
+			inputRef.current.focus()
+			selection.collapse(inputRef.current, inputRef.current.childNodes.length)
+		}
+	}
 
 	const addInputTag = useCallback((tagName) => {
 		addedTags.current.push({ symbol: triggerSymbol.current, name: tagName })
@@ -83,7 +94,21 @@ export default function ReactTaggableField({ tags, onChange, autoFocus = false }
 		inputRef.current.appendChild(textNode)
 	}
 
-  useEffect(() => {
+	useLayoutEffect(() => {
+		if (disabled) {
+			inputRef.current.setAttribute('contenteditable', false)
+			inputRef.current.style.opacity = .5
+		}
+	}, [disabled])
+
+	useLayoutEffect(() => {
+		if (defaultValue) {
+			inputRef.current.innerHTML = defaultValue
+			autoPositionCaret()
+		}
+	}, [defaultValue])
+
+  useLayoutEffect(() => {
 		const keyUpListener = (e) => {
 			// clear held keys
 			heldKeys.current = []
@@ -193,7 +218,7 @@ export default function ReactTaggableField({ tags, onChange, autoFocus = false }
     }
   }, [addInputTag, tags, triggers, onChange, suggestionMap])
 	
-	useEffect(() => {
+	useLayoutEffect(() => {
 		if (inputRef.current) {
 			if (autoFocus) {
 				inputRef.current.focus()
@@ -204,14 +229,7 @@ export default function ReactTaggableField({ tags, onChange, autoFocus = false }
 
 			// Callback function to execute when mutations are observed
 			const callback = function(mutationList, observer) {					
-					const selection = window.getSelection()
-					if (highlightEl.current) {
-						highlightEl.current.focus()
-						selection.collapse(highlightEl.current, highlightEl.current.childNodes.length)
-					} else {
-						inputRef.current.focus()
-						selection.collapse(inputRef.current, inputRef.current.childNodes.length)
-					}
+				autoPositionCaret()
 			}
 
 			// Create an observer instance linked to the callback function

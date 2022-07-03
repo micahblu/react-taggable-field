@@ -20,6 +20,7 @@ stories.add('ReactTaggableField', () => {
 						onChange={({ text, __html, tags}) => {
 							setOutput({ text, __html, tags })
 						}}
+						defaultValue='Hello World'
 						tags={[{
 							triggerSymbol: '#',
 							highlightClass: 'thingHighlight',

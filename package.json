@@ -1,11 +1,13 @@
 {
   "name": "react-taggable-field",
-  "version": "0.1.0",
+  "description": "React taggable field makes inlining tags in an editable input easy and intuitive",
+  "version": "0.1.1",
   "author": "Micah Blu",
   "license": "MIT",
   "private": false,
   "main": "dist/index.js",
   "module": "dist/index.es.js",
+  "repository": "https://github.com/micahblu/react-taggable-field",
   "devDependencies": {
     "@babel/core": "^7.18.6",
     "@babel/preset-react": "^7.18.6",
@@ -31,6 +33,14 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
+  "keywords": [
+    "react",
+    "tags",
+    "tag input",
+    "react-component",
+    "autosuggest",
+    "editable"
+  ],
   "scripts": {
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",

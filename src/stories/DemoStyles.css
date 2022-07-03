@@ -24,6 +24,10 @@
   min-height: 100px;
 }
 
+.demo-input {
+  border: 3px solid green;
+}
+
 .peopleTag {
   color: blue;
   background-color: transparent;

@@ -1,9 +1,12 @@
+react-taggable-field-container {
+  position: relative;
+}
 
 .react-taggable-highlight {
   color: blue;
 }
 
-.input {
+.react-taggable-field-input {
   width: 100%;
 	min-height: 1rem;
   padding: 0.4rem;
@@ -15,21 +18,24 @@
   white-space: nowrap;
 }
 
-.suggestedTags {
+.react-taggable-field-suggested-tags {
+  position: absolute;
+  min-width: 300px;
+  width: fit-content;
   display: grid;
   text-align: left;
 }
 
-.suggestedTag {
+.react-taggable-field-suggested-tag {
   padding: 8px;
 	cursor: pointer;
 }
 
-.suggestedTag:hover {
+.react-taggable-field-suggested-tag:hover {
 	background: #f2f2f2;
 }
 
-.react-taggable-input-tag {
+.react-taggable-field-input-tag {
   background: #333;
   color: white;
   padding: 0 5px;

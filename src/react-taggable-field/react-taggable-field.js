@@ -8,7 +8,7 @@ const removeBreaks = (el) => {
 	}
 }
 
-export default function ReactTaggableField({ tags, onChange, autoFocus = false, defaultValue, disabled = false }) {
+export default function ReactTaggableField({ tags, onChange, autoFocus = false, defaultValue, disabled = false, inputClass }) {
   const inputRef = useRef()
 	const isMatching = useRef(false)
 	const highlightEl = useRef(null)
@@ -23,12 +23,13 @@ export default function ReactTaggableField({ tags, onChange, autoFocus = false, 
 		return acc
 	}, {})
 
-	const baseHighlightClass = 'react-taggable-highlight'
-	const baseInputTagClass = 'react-taggable-input-tag'
+	const baseHighlightClass = 'react-taggable-field-highlight'
+	const baseInputTagClass = 'react-taggable-field-input-tag'
 	const matches = useRef([])
 
 	const autoPositionCaret = () => {
 		const selection = window.getSelection()
+		// Needed for firefox as caret and focus will be outside of the span element
 		if (highlightEl.current) {
 			highlightEl.current.focus()
 			selection.collapse(highlightEl.current, highlightEl.current.childNodes.length)
@@ -49,7 +50,7 @@ export default function ReactTaggableField({ tags, onChange, autoFocus = false, 
 			>
 				${tagName}
 			</span>
-			<span class='emptytext' />
+			<span class='react-taggable-field-empty-space'>&nbsp;</span>
 		`
 		
 		// remove highlight el
@@ -61,7 +62,6 @@ export default function ReactTaggableField({ tags, onChange, autoFocus = false, 
 		inputRef.current.removeChild(lastNode)
 		inputRef.current.innerHTML += tagNode
 
-		inputRef.current.appendChild(document.createTextNode('\u00A0')) // add white space at end
 		setShowSuggestions(false)
 		autoPositionCaret()
 	}, [addedTags, tags])
@@ -206,18 +206,18 @@ export default function ReactTaggableField({ tags, onChange, autoFocus = false, 
   }, [addInputTag, tags, triggers, onChange, suggestionMap])
 
   return (
-    <div className='taggable'>
-      <div className='inputWrapper'>
+    <div className='react-taggable-field'>
+      <div className='react-taggable-field-container'>
         <div
-          className='input'
+          className={`react-taggable-field-input ${inputClass}`}
           ref={inputRef}
           contentEditable
         />
       </div>
       {showSuggestions && (
-        <div className='suggestedTags'>
+        <div className='react-taggable-field-suggested-tags'>
           {matchingTags.map((tag) => (
-            <div onClick={() => addInputTag(tag)} key={tag} className='suggestedTag'>
+            <div onClick={() => addInputTag(tag)} key={tag} className='react-taggable-field-suggested-tag'>
               {tag}
             </div>
           ))}

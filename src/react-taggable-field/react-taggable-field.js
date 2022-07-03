@@ -8,7 +8,23 @@ const removeBreaks = (el) => {
 	}
 }
 
-export default function ReactTaggableField({ tags, onChange, autoFocus = false, defaultValue, disabled = false, inputClass }) {
+const getLastElement = (parentEl) => {
+	const len = parentEl.childNodes.length - 1
+	for (let i = len; i >= 0; i--) {
+		const currentEl = parentEl.childNodes[i]
+		if (currentEl.nodeName !== '#text') return currentEl
+	}
+}
+
+export default function ReactTaggableField({
+	tags,
+	onChange,
+	autoFocus = false,
+	defaultValue,
+	disabled = false,
+	inputClass,
+	suggestionClass
+}) {
   const inputRef = useRef()
 	const isMatching = useRef(false)
 	const highlightEl = useRef(null)
@@ -39,11 +55,18 @@ export default function ReactTaggableField({ tags, onChange, autoFocus = false, 
 		}
 	}
 
+	const scrollIntoView = () => {
+		const lastElement = getLastElement(inputRef.current)
+		 if (lastElement?.scrollIntoView) {
+			lastElement.scrollIntoView()
+		 }
+	}
+
 	const addInputTag = useCallback((tagName) => {
 		addedTags.current.push({ symbol: triggerSymbol.current, name: tagName })
 		const lastNode = inputRef.current.childNodes[inputRef.current.childNodes.length - 1]
 
-		const tagNode = `
+		const tagHtml = `
 			<span
 				class='${baseInputTagClass} ${tags.find(t => t.triggerSymbol === triggerSymbol.current).tagClass}'
 				contenteditable='false'
@@ -52,7 +75,6 @@ export default function ReactTaggableField({ tags, onChange, autoFocus = false, 
 			</span>
 			<span class='react-taggable-field-empty-space'>&nbsp;</span>
 		`
-		
 		// remove highlight el
 		highlightEl.current = null
 
@@ -60,9 +82,10 @@ export default function ReactTaggableField({ tags, onChange, autoFocus = false, 
 		isMatching.current = false
 		// remove highlighted node and replace with tag node
 		inputRef.current.removeChild(lastNode)
-		inputRef.current.innerHTML += tagNode
+		inputRef.current.innerHTML += tagHtml
 
 		setShowSuggestions(false)
+		scrollIntoView()
 		autoPositionCaret()
 	}, [addedTags, tags])
 
@@ -191,6 +214,7 @@ export default function ReactTaggableField({ tags, onChange, autoFocus = false, 
 
         setShowSuggestions(true)
 				autoPositionCaret()
+				scrollIntoView()
         e.preventDefault()
 			}
 
@@ -215,7 +239,7 @@ export default function ReactTaggableField({ tags, onChange, autoFocus = false, 
         />
       </div>
       {showSuggestions && (
-        <div className='react-taggable-field-suggested-tags'>
+        <div className={`react-taggable-field-suggested-tags ${suggestionClass}`}>
           {matchingTags.map((tag) => (
             <div onClick={() => addInputTag(tag)} key={tag} className='react-taggable-field-suggested-tag'>
               {tag}

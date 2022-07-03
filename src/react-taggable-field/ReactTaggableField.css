@@ -24,6 +24,10 @@ react-taggable-field-container {
   width: fit-content;
   display: grid;
   text-align: left;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: white;
+  z-index: 1;
 }
 
 .react-taggable-field-suggested-tag {

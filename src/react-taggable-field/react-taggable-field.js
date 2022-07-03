@@ -1,24 +1,6 @@
 import React, { useState, useLayoutEffect, useRef, useCallback } from 'react'
 import './ReactTaggableField.css'
 
-const createEl = ({
-	elType = 'div',
-	text = '',
-	__html,
-	contentEditable = true,
-	className = ''
-}) => {
-	const el = document.createElement(elType)
-	el.className = className
-	el.innerText = text
-	if (__html) {
-		el.innerHTML = __html
-	}
-
-	el.setAttribute('contenteditable', contentEditable)
-	return el
-}
-
 const removeBreaks = (el) => {
 	const nodes = el.getElementsByTagName('br')
 	for (let i = 0; i < nodes.length; i++) {
@@ -59,12 +41,16 @@ export default function ReactTaggableField({ tags, onChange, autoFocus = false, 
 	const addInputTag = useCallback((tagName) => {
 		addedTags.current.push({ symbol: triggerSymbol.current, name: tagName })
 		const lastNode = inputRef.current.childNodes[inputRef.current.childNodes.length - 1]
-		const tagNode = createEl({
-			elType: 'span',
-			contentEditable: false,
-			className: `${baseInputTagClass} ${tags.find(t => t.triggerSymbol === triggerSymbol.current).tagClass}`,
-			text: tagName
-		})
+
+		const tagNode = `
+			<span
+				class='${baseInputTagClass} ${tags.find(t => t.triggerSymbol === triggerSymbol.current).tagClass}'
+				contenteditable='false'
+			>
+				${tagName}
+			</span>
+			<span class='emptytext' />
+		`
 		
 		// remove highlight el
 		highlightEl.current = null
@@ -73,10 +59,11 @@ export default function ReactTaggableField({ tags, onChange, autoFocus = false, 
 		isMatching.current = false
 		// remove highlighted node and replace with tag node
 		inputRef.current.removeChild(lastNode)
-		inputRef.current.appendChild(tagNode)
+		inputRef.current.innerHTML += tagNode
 
 		inputRef.current.appendChild(document.createTextNode('\u00A0')) // add white space at end
 		setShowSuggestions(false)
+		autoPositionCaret()
 	}, [addedTags, tags])
 
 	const removeHighlight = (lastNode) => {
@@ -116,12 +103,13 @@ export default function ReactTaggableField({ tags, onChange, autoFocus = false, 
 			if (e.key === 'Tab' || e.key === ' ' || e.key === 'Enter') {
 				const lastNode = inputRef.current.childNodes[inputRef.current.childNodes.length - 1]
 				const nodeText = lastNode.innerText?.replace(triggerSymbol.current, '').toLowerCase() || ''
-				if ((matches.current.length === 1 && isMatching.current) || matches.current.includes(nodeText)) {
+				if ((lastNode && matches.current.length === 1 && isMatching.current) || matches.current.includes(nodeText)) {
 					const tag = matches.current.length === 1 ? matches.current[0] : nodeText
 					addInputTag(tag)
-				} else if (lastNode.nodeName !== '#text' && lastNode.classList?.contains(baseHighlightClass) && matches.current.length === 0) {
+				} else if (lastNode.nodeName !== '#text' && lastNode?.classList?.contains(baseHighlightClass) && matches.current.length === 0) {
 					removeHighlight(lastNode)
 					if (e.key !== ' ') inputRef.current.appendChild(document.createTextNode('\u00A0'))
+					autoPositionCaret()
 					e.preventDefault()
 				}
       }
@@ -154,21 +142,22 @@ export default function ReactTaggableField({ tags, onChange, autoFocus = false, 
 					inputRef.current.innerHTML = ''
 					return
 				} else if (
-					lastNode.nodeValue === '\u00A0' && (
-						lastNode.classList?.contains(baseInputTagClass) ||
-						lastElement.classList?.contains(baseInputTagClass)
+					lastNode?.nodeValue === '\u00A0' && (
+						lastNode?.classList?.contains(baseInputTagClass) ||
+						lastElement?.classList?.contains(baseInputTagClass)
 					)
 				) {
 					// remove the tag
 					addedTags.current.pop()
 					inputRef.current.removeChild(lastNode)
 					inputRef.current.removeChild(lastElement)
+					autoPositionCaret()
 					e.preventDefault()
 					return
 				}
 
 				if (
-					lastNode.classList?.contains(baseInputTagClass) ||
+					lastNode?.classList?.contains(baseInputTagClass) ||
 					(lastNode === highlightEl.current && lastNode.innerText === triggerSymbol.current) ||
 					heldKeys.current.slice(-1)[0] === 'Alt' ||
 					heldKeys.current.slice(-1)[0] === 'Control'
@@ -193,17 +182,15 @@ export default function ReactTaggableField({ tags, onChange, autoFocus = false, 
 
 				isMatching.current = true
 
-				const span = createEl({
-					elType: 'span',
-					className: `${baseHighlightClass} ${tags.find(t => t.triggerSymbol === triggerSymbol.current).highlightClass}`,
-					contentEditable: true,
-					text: triggerSymbol.current
-				})
+				highlightEl.current = document.createElement('span')
+				highlightEl.current.className = `${baseHighlightClass} ${tags.find(t => t.triggerSymbol === triggerSymbol.current).highlightClass}`
+				highlightEl.current.innerText = triggerSymbol.current
+				highlightEl.current.setAttribute('contentEditable', true)
 
-				inputRef.current.appendChild(span)
+				inputRef.current.appendChild(highlightEl.current)
 
         setShowSuggestions(true)
-				highlightEl.current = span
+				autoPositionCaret()
         e.preventDefault()
 			}
 
@@ -217,31 +204,6 @@ export default function ReactTaggableField({ tags, onChange, autoFocus = false, 
       document.removeEventListener('keyup', keyUpListener)
     }
   }, [addInputTag, tags, triggers, onChange, suggestionMap])
-	
-	useLayoutEffect(() => {
-		if (inputRef.current) {
-			if (autoFocus) {
-				inputRef.current.focus()
-			}
-
-			// Options for the observer (which mutations to observe)
-			const config = { attributes: true, childList: true, subtree: true }
-
-			// Callback function to execute when mutations are observed
-			const callback = function(mutationList, observer) {					
-				autoPositionCaret()
-			}
-
-			// Create an observer instance linked to the callback function
-			const observer = new MutationObserver(callback)
-
-			// Start observing the target node for configured mutations
-			observer.observe(inputRef.current, config)
-
-			// Remove observer on unmount
-			return () => observer.disconnect()
-		}
-	}, [inputRef, addInputTag, autoFocus])
 
   return (
     <div className='taggable'>

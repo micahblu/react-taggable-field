@@ -29,8 +29,8 @@ const rollupConfig = [
 				plugins: [],
 				minimize: true
 			})
-			// ,
-			// terser()
+			,
+			terser()
 		]
 	}
 ]

@@ -1,6 +1,9 @@
 import React, { useState, useLayoutEffect, useRef, useCallback } from 'react'
-import { removeBreaks, getLastElement } from './helpers'
+import { removeBreaks, getLastElement, getLastNode } from './helpers'
 import './ReactTaggableField.css'
+
+const HIGHLIGHT_CLASS = 'react-taggable-field-highlight'
+const INPUT_TAG_CLASS = 'react-taggable-field-input-tag'
 
 export default function ReactTaggableField({
 	tags,
@@ -22,12 +25,10 @@ export default function ReactTaggableField({
 	const triggers = tags.map(tgroup => tgroup.triggerSymbol)
 	const heldKeys = useRef([])
 	const suggestionMap = tags.reduce((acc, tgroup) => {
-		acc[tgroup.triggerSymbol] = tgroup.suggestions
+		acc[tgroup.triggerSymbol] = { ...tgroup }
 		return acc
 	}, {})
 
-	const baseHighlightClass = 'react-taggable-field-highlight'
-	const baseInputTagClass = 'react-taggable-field-input-tag'
 	const matches = useRef([])
 
 	const autoPositionCaret = () => {
@@ -37,6 +38,7 @@ export default function ReactTaggableField({
 			highlightEl.current.focus()
 			selection.collapse(highlightEl.current, highlightEl.current.childNodes.length)
 		} else {
+			// console.log('FOCUSING INPUT and COLLAPSING CARET', inputRef.current.childNodes)
 			inputRef.current.focus()
 			selection.collapse(inputRef.current, inputRef.current.childNodes.length)
 		}
@@ -49,18 +51,23 @@ export default function ReactTaggableField({
 		 }
 	}
 
-	const addInputTag = useCallback((tagName) => {
-		addedTags.current.push({ symbol: triggerSymbol.current, name: tagName })
-		const lastNode = inputRef.current.childNodes[inputRef.current.childNodes.length - 1]
+	const addInputTag = useCallback((tag) => {
+		addedTags.current.push({ symbol: triggerSymbol.current, ...tag })
+		const lastNode = getLastNode(inputRef.current)
+		const tagClasses = [INPUT_TAG_CLASS]
+		const globalTagClass = suggestionMap[triggerSymbol.current].tagClass
 
+		if (globalTagClass) tagClasses.push(globalTagClass)
+		if (tag.tagClass) tagClasses.push(tag.tagClass)
+		
 		const tagHtml = `
 			<span
-				class='${baseInputTagClass} ${tags.find(t => t.triggerSymbol === triggerSymbol.current).tagClass}'
+				class='${tagClasses.join(' ')}'
 				contenteditable='false'
 			>
-				${tagName}
+				${tag.label}
 			</span>
-			<span class='react-taggable-field-empty-space'>&nbsp;</span>
+			&ZeroWidthSpace;
 		`
 		// remove highlight el
 		highlightEl.current = null
@@ -71,10 +78,12 @@ export default function ReactTaggableField({
 		inputRef.current.removeChild(lastNode)
 		inputRef.current.innerHTML += tagHtml
 
+		// inputRef.appendChild(document.createTextNode('&#65279;'))
+
 		setShowSuggestions(false)
 		scrollIntoView()
 		autoPositionCaret()
-	}, [addedTags, tags])
+	}, [addedTags, suggestionMap])
 
 	const removeHighlight = (lastNode) => {
 		const lastNodeText = lastNode.innerText
@@ -111,12 +120,12 @@ export default function ReactTaggableField({
 			heldKeys.current = []
 
 			if (e.key === 'Tab' || e.key === ' ' || e.key === 'Enter') {
-				const lastNode = inputRef.current.childNodes[inputRef.current.childNodes.length - 1]
+				const lastNode = getLastNode(inputRef.current)
 				const nodeText = lastNode.innerText?.replace(triggerSymbol.current, '').toLowerCase() || ''
 				if ((lastNode && matches.current.length === 1 && isMatching.current) || matches.current.includes(nodeText)) {
 					const tag = matches.current.length === 1 ? matches.current[0] : nodeText
 					addInputTag(tag)
-				} else if (lastNode.nodeName !== '#text' && lastNode?.classList?.contains(baseHighlightClass) && matches.current.length === 0) {
+				} else if (lastNode.nodeName !== '#text' && lastNode?.classList?.contains(HIGHLIGHT_CLASS) && matches.current.length === 0) {
 					removeHighlight(lastNode)
 					if (e.key !== ' ') inputRef.current.appendChild(document.createTextNode('\u00A0'))
 					autoPositionCaret()
@@ -127,7 +136,7 @@ export default function ReactTaggableField({
 						__html: inputRef.current.innerHTML,
 						tags: addedTags.current
 					}, () => {
-						// clear method
+						// return a clear method
 						inputRef.current.innerHTML = ''
 						addedTags.current = []
 					})
@@ -138,7 +147,7 @@ export default function ReactTaggableField({
 				const symbolIndex = inputStr.lastIndexOf(triggerSymbol.current)
 				const searchStr = inputStr.substr(symbolIndex + 1).replace(/[^\w]/, '')
 				const regex = new RegExp(searchStr, 'i')
-				matches.current = suggestionMap[triggerSymbol.current].filter((tag) => regex.test(tag))
+				matches.current = suggestionMap[triggerSymbol.current].suggestions.filter((tag) => regex.test(tag.label))
 				setMatchingTags(matches.current)
 			} else {
 				onChange({
@@ -153,19 +162,18 @@ export default function ReactTaggableField({
 
 			if (e.key === 'Enter' || e.key === 'Tab') e.preventDefault()
       if (e.key === 'Backspace') {
-				const lastNode = inputRef.current.childNodes[inputRef.current.childNodes.length - 1]
-				const lastElement = inputRef.current.children[inputRef.current.children.length - 1]
-			
+				const anchorNode = window.getSelection().anchorNode
+				const lastNode = getLastNode(anchorNode)
+				const lastElement = getLastElement(inputRef.current)
 				if (heldKeys.current.slice(-1)[0] === 'Meta') {
 					// remove everything
 					addedTags.current = []
 					inputRef.current.innerHTML = ''
 					return
 				} else if (
-					lastNode?.nodeValue === '\u00A0' && (
-						lastNode?.classList?.contains(baseInputTagClass) ||
-						lastElement?.classList?.contains(baseInputTagClass)
-					)
+					lastNode?.nodeName === '#text' &&
+					lastNode?.nodeValue.trim().length === 1 &&
+					lastElement?.classList.contains(INPUT_TAG_CLASS)
 				) {
 					// remove the tag
 					addedTags.current.pop()
@@ -174,19 +182,11 @@ export default function ReactTaggableField({
 					autoPositionCaret()
 					e.preventDefault()
 					return
-				}
-
-				if (
-					lastNode?.classList?.contains(baseInputTagClass) ||
-					(lastNode === highlightEl.current && lastNode.innerText === triggerSymbol.current) ||
-					heldKeys.current.slice(-1)[0] === 'Alt' ||
-					heldKeys.current.slice(-1)[0] === 'Control'
-				) {
-					inputRef.current.removeChild(lastNode)
+				} else if (isMatching.current && lastNode.nodeValue === triggerSymbol.current) {
+					inputRef.current.removeChild(highlightEl.current)
 					highlightEl.current = null
 					isMatching.current = false
 					setShowSuggestions(false)
-
 					e.preventDefault()
 				}
 			} else if (triggers.includes(e.key)) {
@@ -203,7 +203,7 @@ export default function ReactTaggableField({
 				isMatching.current = true
 
 				highlightEl.current = document.createElement('span')
-				highlightEl.current.className = `${baseHighlightClass} ${tags.find(t => t.triggerSymbol === triggerSymbol.current).highlightClass}`
+				highlightEl.current.className = `${HIGHLIGHT_CLASS} ${tags.find(t => t.triggerSymbol === triggerSymbol.current).highlightClass}`
 				highlightEl.current.innerText = triggerSymbol.current
 				highlightEl.current.setAttribute('contentEditable', true)
 
@@ -224,7 +224,7 @@ export default function ReactTaggableField({
       document.removeEventListener('keydown', keyDownListener)
       document.removeEventListener('keyup', keyUpListener)
     }
-  }, [addInputTag, tags, triggers, onChange, suggestionMap])
+  }, [addInputTag, tags, triggers, onChange, suggestionMap, onSubmit])
 
   return (
     <div className='react-taggable-field'>
@@ -238,8 +238,8 @@ export default function ReactTaggableField({
       {showSuggestions && (
         <div className={`react-taggable-field-suggested-tags ${suggestionClass}`}>
           {matchingTags.map((tag) => (
-            <div onClick={() => addInputTag(tag)} key={tag} className='react-taggable-field-suggested-tag'>
-              {tag}
+            <div onClick={() => addInputTag(tag.label)} key={tag.label} className='react-taggable-field-suggested-tag'>
+              { tag.label }
             </div>
           ))}
         </div>

@@ -31,19 +31,19 @@ stories.add('ReactTaggableField', () => {
 							highlightClass: 'thingHighlight',
 							tagClass: 'thingTag',
 							suggestions: [
-								'amazing',
-								'cool',
-								'funny',
-								'interesting',
-								'inspiring'
+								{ label: 'amazing', tagClass: 'customTagClass1' },
+								{ label: 'cool', tagClass: 'customTagClass2' },
+								{ label: 'funny', tagClass: 'customTagClass3' },
+								{ label: 'interesting', tagClass: 'customTagClass4' },
+								{ label: 'inspiring', tagClass: 'customTagClass5' }
 							]}, {
 							triggerSymbol: '@',
 							highlightClass: 'peopleHighlight',
 							tagClass: 'peopleTag',
 							suggestions: [
-								'Albert Einstein',
-								'Richard Feynman',
-								'Nikola Tesla'
+								{ label: 'Albert Einstein' },
+								{ label: 'Richard Feynman' },
+								{ label: 'Nikola Tesla' }
 							]}
 						]}
 					/>
@@ -57,7 +57,7 @@ stories.add('ReactTaggableField', () => {
 					<textarea value={output.__html} />
 
 					<label>Tags</label>
-					<div>{output.tags?.map(t => t.name).join(', ')}</div>
+					<div>{output.tags?.map(t => t.label).join(', ')}</div>
 				</div>
 			</div>
 		</div>

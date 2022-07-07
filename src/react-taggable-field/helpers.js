@@ -12,3 +12,7 @@ export const getLastElement = (parentEl) => {
 		if (currentEl.nodeName !== '#text') return currentEl
 	}
 }
+
+export const getLastNode = (parentEl) => {
+	return parentEl.childNodes[parentEl.childNodes.length - 1]
+}

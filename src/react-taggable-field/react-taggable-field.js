@@ -73,8 +73,7 @@ export default function ReactTaggableField({
 		if (globalTagClass) tagClasses.push(globalTagClass)
 		if (tag.tagClass) tagClasses.push(tag.tagClass)
 		
-		const tagHtml = `
-			<span
+		const tagHtml = `<span
 				class='${tagClasses.join(' ')}'
 				contenteditable='false'
 			>

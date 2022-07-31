@@ -38,10 +38,23 @@ export default function ReactTaggableField({
 			highlightEl.current.focus()
 			selection.collapse(highlightEl.current, highlightEl.current.childNodes.length)
 		} else {
-			// console.log('FOCUSING INPUT and COLLAPSING CARET', inputRef.current.childNodes)
 			inputRef.current.focus()
 			selection.collapse(inputRef.current, inputRef.current.childNodes.length)
 		}
+	}
+
+	const nodeIsAfter = (nodeAfter, nodeBefore, parentNode) => {
+		let nodeAfterPos = 0
+		let nodeBeforePos = 0
+		for (let i = 0; i < parentNode.childNodes.length; i++) {
+			if (nodeAfter === parentNode.childNodes[i]) {
+				nodeAfterPos = i
+			}
+			else if (nodeBefore === parentNode.childNodes[i]) {
+				nodeBeforePos = i
+			}
+		}
+		return nodeAfterPos > nodeBeforePos
 	}
 
 	const scrollIntoView = () => {
@@ -74,11 +87,10 @@ export default function ReactTaggableField({
 
 		// no longer matching
 		isMatching.current = false
+
 		// remove highlighted node and replace with tag node
 		inputRef.current.removeChild(lastNode)
 		inputRef.current.innerHTML += tagHtml
-
-		// inputRef.appendChild(document.createTextNode('&#65279;'))
 
 		setShowSuggestions(false)
 		scrollIntoView()
@@ -162,23 +174,27 @@ export default function ReactTaggableField({
 
 			if (e.key === 'Enter' || e.key === 'Tab') e.preventDefault()
       if (e.key === 'Backspace') {
-				const anchorNode = window.getSelection().anchorNode
-				const lastNode = getLastNode(anchorNode)
-				const lastElement = getLastElement(inputRef.current)
+				const selection = window.getSelection()
+				const anchorNode = selection.anchorNode
+				const lastNode = getLastNode(anchorNode) || getLastNode(inputRef.current)
+				const lastElement = getLastElement(anchorNode) || getLastElement(inputRef.current)
+
 				if (heldKeys.current.slice(-1)[0] === 'Meta') {
 					// remove everything
 					addedTags.current = []
 					inputRef.current.innerHTML = ''
 					return
 				} else if (
-					lastNode?.nodeName === '#text' &&
-					lastNode?.nodeValue.trim().length === 1 &&
-					lastElement?.classList.contains(INPUT_TAG_CLASS)
+					lastElement?.classList?.contains(INPUT_TAG_CLASS) &&
+					(anchorNode === inputRef.current || nodeIsAfter(anchorNode, lastElement, inputRef.current)) &&
+					lastNode.nodeName === '#text' &&
+					lastNode?.nodeValue?.replace(/[\r\t\n]+/g, '').length < 2
 				) {
 					// remove the tag
 					addedTags.current.pop()
-					inputRef.current.removeChild(lastNode)
-					inputRef.current.removeChild(lastElement)
+					inputRef.current.removeChild(lastNode || getLastNode(inputRef.current))
+					inputRef.current.removeChild(lastElement || getLastElement(inputRef.current))
+					// console.log('inputREf.current.childNodes', inputRef.current.childNodes)
 					autoPositionCaret()
 					e.preventDefault()
 					return
@@ -214,7 +230,6 @@ export default function ReactTaggableField({
 				scrollIntoView()
         e.preventDefault()
 			}
-
 			// store held keys
 			heldKeys.current.push(e.key)
     }

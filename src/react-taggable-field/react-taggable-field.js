@@ -256,7 +256,7 @@ export default function ReactTaggableField({
       {showSuggestions && (
         <div className={`react-taggable-field-suggested-tags ${suggestionClass}`}>
           {matchingTags.map((tag) => (
-            <div onClick={() => addInputTag(tag.label)} key={tag.label} className='react-taggable-field-suggested-tag'>
+            <div onClick={() => addInputTag(tag)} key={tag.label} className='react-taggable-field-suggested-tag'>
               { tag.label }
             </div>
           ))}

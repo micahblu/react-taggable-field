@@ -183,6 +183,9 @@ export default function ReactTaggableField({
 					// remove everything
 					addedTags.current = []
 					inputRef.current.innerHTML = ''
+					// reset any matching conditions
+					isMatching.current = false
+					setShowSuggestions(false)
 					return
 				} else if (
 					lastElement?.classList?.contains(INPUT_TAG_CLASS) &&
@@ -198,7 +201,7 @@ export default function ReactTaggableField({
 					autoPositionCaret()
 					e.preventDefault()
 					return
-				} else if (isMatching.current && lastNode.nodeValue === triggerSymbol.current) {
+				} else if (isMatching.current && lastNode.innerText === triggerSymbol.current) {
 					inputRef.current.removeChild(highlightEl.current)
 					highlightEl.current = null
 					isMatching.current = false

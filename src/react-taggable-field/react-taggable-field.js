@@ -79,8 +79,7 @@ export default function ReactTaggableField({
 			>
 				${tag.label}
 			</span>
-			&ZeroWidthSpace;
-		`
+			&ZeroWidthSpace;`
 		// remove highlight el
 		highlightEl.current = null
 
@@ -127,8 +126,8 @@ export default function ReactTaggableField({
 
   useLayoutEffect(() => {
 		const keyUpListener = (e) => {
-			// clear held keys
-			heldKeys.current = []
+			// pop last hit key
+			heldKeys.current = heldKeys.current.filter(k => k !== e.key)
 
 			if (e.key === 'Tab' || e.key === ' ' || e.key === 'Enter') {
 				const lastNode = getLastNode(inputRef.current)
@@ -190,7 +189,7 @@ export default function ReactTaggableField({
 					lastElement?.classList?.contains(INPUT_TAG_CLASS) &&
 					(anchorNode === inputRef.current || nodeIsAfter(anchorNode, lastElement, inputRef.current)) &&
 					lastNode.nodeName === '#text' &&
-					lastNode?.nodeValue?.replace(/[\r\t\n]+/g, '').length < 2
+					lastNode?.nodeValue?.replace(/[\r\t\n]+/g, '').length < (heldKeys.current.slice(-1)[0] === 'Alt' ? 3 : 2)
 				) {
 					// remove the tag
 					addedTags.current.pop()
@@ -199,7 +198,6 @@ export default function ReactTaggableField({
 					// console.log('inputREf.current.childNodes', inputRef.current.childNodes)
 					autoPositionCaret()
 					e.preventDefault()
-					return
 				} else if (isMatching.current && lastNode.innerText === triggerSymbol.current) {
 					inputRef.current.removeChild(highlightEl.current)
 					highlightEl.current = null
@@ -232,7 +230,7 @@ export default function ReactTaggableField({
 				scrollIntoView()
         e.preventDefault()
 			}
-			// store held keys
+
 			heldKeys.current.push(e.key)
     }
     document.addEventListener('keydown', keyDownListener)

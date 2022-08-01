@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect, useRef, useCallback } from 'react'
-import { removeBreaks, getLastElement, getLastNode } from './helpers'
+import { removeBreaks, getLastElement, getLastNode, getCaretPosition } from './helpers'
 import './ReactTaggableField.css'
 
 const HIGHLIGHT_CLASS = 'react-taggable-field-highlight'
@@ -174,8 +174,9 @@ export default function ReactTaggableField({
       if (e.key === 'Backspace') {
 				const selection = window.getSelection()
 				const anchorNode = selection.anchorNode
-				const lastNode = getLastNode(anchorNode) || getLastNode(inputRef.current)
-				const lastElement = getLastElement(anchorNode) || getLastElement(inputRef.current)
+				const lastNode = getLastNode(inputRef.current, anchorNode)
+				const lastElement = getLastElement(inputRef.current, anchorNode)
+				const caretPos = getCaretPosition(inputRef.current)
 
 				if (heldKeys.current.slice(-1)[0] === 'Meta') {
 					// remove everything
@@ -187,16 +188,12 @@ export default function ReactTaggableField({
 					return
 				} else if (
 					lastElement?.classList?.contains(INPUT_TAG_CLASS) &&
-					(anchorNode === inputRef.current || nodeIsAfter(anchorNode, lastElement, inputRef.current)) &&
 					lastNode.nodeName === '#text' &&
-					lastNode?.nodeValue?.replace(/[\r\t\n]+/g, '').length < (heldKeys.current.slice(-1)[0] === 'Alt' ? 3 : 2)
+					caretPos <= (heldKeys.current.slice(-1)[0] === 'Alt' ? 1 : 0)
 				) {
 					// remove the tag
 					addedTags.current.pop()
-					inputRef.current.removeChild(lastNode || getLastNode(inputRef.current))
 					inputRef.current.removeChild(lastElement || getLastElement(inputRef.current))
-					// console.log('inputREf.current.childNodes', inputRef.current.childNodes)
-					autoPositionCaret()
 					e.preventDefault()
 				} else if (isMatching.current && lastNode.innerText === triggerSymbol.current) {
 					inputRef.current.removeChild(highlightEl.current)

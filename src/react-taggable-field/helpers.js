@@ -5,14 +5,38 @@ export const removeBreaks = (el) => {
 	}
 }
 
-export const getLastElement = (parentEl) => {
+export const getLastElement = (parentEl, refNode) => {
 	const len = parentEl.childNodes.length - 1
-	for (let i = len; i >= 0; i--) {
+	let lastElement
+	for (let i = 0; i <= len; i++) {
 		const currentEl = parentEl.childNodes[i]
-		if (currentEl.nodeName !== '#text') return currentEl
+		if (currentEl.nodeName !== '#text') {
+			lastElement = currentEl
+		}
+		if (currentEl === refNode) break
 	}
+	return lastElement
 }
 
-export const getLastNode = (parentEl) => {
-	return parentEl.childNodes[parentEl.childNodes.length - 1]
+export const getLastNode = (parentNode, refNode) => {
+	if (!refNode) {
+		return parentNode.childNodes[parentNode.childNodes.length - 1]
+	}
+	const len = parentNode.childNodes.length - 1
+	let lastNode
+	for (let i = 0; i <= len; i++) {
+		lastNode = parentNode.childNodes[i]
+		if (lastNode === refNode) break
+	}
+	return lastNode
+}
+
+export const getCaretPosition = (elem) => {
+  const sel = document.getSelection()
+	sel.modify('extend', 'backward', 'paragraphboundary')
+	const pos = sel.toString().replace(/[\u200B-\u200D\uFEFF]/g, '').length
+
+	if(sel.anchorNode !== undefined) sel.collapseToEnd()
+
+	return pos
 }

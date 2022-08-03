@@ -173,7 +173,6 @@ export default function ReactTaggableField({
 		}
     const keyDownListener = (e) => {
 			removeBreaks(inputRef.current)
-			console.log('KEY DOWN CARET POS: ', getCaretPosition(inputRef.current))
 			if (e.key === 'Enter' || e.key === 'Tab') e.preventDefault()
       if (e.key === 'Backspace') {
 				const selection = document.getSelection()

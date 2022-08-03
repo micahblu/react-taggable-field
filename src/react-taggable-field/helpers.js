@@ -61,7 +61,6 @@ export const insertAtCaretPos = (parentEl, insertEl) => {
 	let charCount = 0
 	for (let i = 0; i < parentEl.childNodes.length; i++) {
 		if (parentEl.childNodes[i] === anchorNode) break
-		// console.log('ADDING CHAR LENGTH FROM NODE', parentEl.childNodes[i])
 		if (parentEl.childNodes[i].innerText) {
 			charCount += parentEl.childNodes[i].innerText.length
 		} else {
@@ -89,14 +88,12 @@ export const insertAtCaretPos = (parentEl, insertEl) => {
 	const nextSibling = anchorNode.nextSibling
 	
 	parentEl.removeChild(anchorNode)
-	console.log('nextSibling', nextSibling)
+
 	if (nextSibling) {
-		console.log('INSERTING BEFORE --------------- ')
 		parentEl.insertBefore(afterNode, nextSibling)
 		parentEl.insertBefore(insertEl, afterNode)
 		parentEl.insertBefore(beforeNode, insertEl)
 	} else {
-		console.log('APPENDING -------------- ')
 		parentEl.appendChild(beforeNode)
 		parentEl.appendChild(insertEl)
 		parentEl.appendChild(afterNode)

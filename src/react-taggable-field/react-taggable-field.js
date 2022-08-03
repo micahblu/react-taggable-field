@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect, useRef, useCallback} from 'react'
-import { removeBreaks, getLastElement, getLastNode, insertAtCaretPos, insertAfter, getCaretPosition } from './helpers'
+import { removeBreaks, getLastElement, getLastNode, insertAtCaretPos, insertAfter } from './helpers'
 import './ReactTaggableField.css'
 
 const HIGHLIGHT_CLASS = 'react-taggable-field-highlight'

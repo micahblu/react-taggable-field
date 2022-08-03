@@ -96,19 +96,19 @@ export default function ReactTaggableField({
 		updateTags()
 	}, [addedTags, suggestionMap])
 
-	const removeHighlight = (highlightEl) => {
-		const lastNodeText = highlightEl.innerText
+	const removeHighlight = () => {
+		// Add text node
+		const textNode = document.createTextNode(highlightEl.current.innerText)
 
 		// remove highlighted node
-		inputRef.current.removeChild(highlightEl)
+		insertAfter(textNode, highlightEl.current)
+
+		inputRef.current.removeChild(highlightEl.current)
+
 		highlightEl.current = null
 		isMatching.current = false
 
 		setShowSuggestions(false)
-
-		// Add text node
-		const textNode = document.createTextNode(lastNodeText)
-		inputRef.current.appendChild(textNode)
 	}
 
 	useLayoutEffect(() => {
@@ -139,10 +139,10 @@ export default function ReactTaggableField({
 					const tag = matches.current.length === 1 ? matches.current[0] : nodeText
 					addInputTag(tag)
 				} else if (isMatching.current && matches.current.length === 0) {
-					removeHighlight(highlightEl.current)
-					if (e.key !== ' ') inputRef.current.appendChild(document.createTextNode('\u00A0'))
+					removeHighlight()
+					// if (e.key !== ' ') inputRef.current.appendChild(document.createTextNode('\u00A0'))
 					autoPositionCaret()
-					e.preventDefault()
+					// e.preventDefault()
 				} else if (e.key === 'Enter') {
 					onSubmit({
 						text: inputRef.current.innerText,

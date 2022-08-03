@@ -31,85 +31,75 @@ export const getLastNode = (parentNode, refNode) => {
 	return lastNode
 }
 
-export const getCaretPosition = (editable) => {
-	 // collapse selection to end
-	 window.getSelection().collapseToEnd()
+export const getCaretPosition = (element) => {
+	let caretOffset = 0
 
-	 const sel = window.getSelection()
-	 const range = sel.getRangeAt(0)
+  if (window.getSelection) {
+    var range = window.getSelection().getRangeAt(0)
+    var preCaretRange = range.cloneRange()
+    preCaretRange.selectNodeContents(element)
+    preCaretRange.setEnd(range.endContainer, range.endOffset)
+    caretOffset = preCaretRange.toString().length
+  } 
 
-	 // get anchor node if startContainer parent is editable
-	 let selectedNode = editable === range.startContainer.parentNode
-		 ? sel.anchorNode 
-		 : range.startContainer.parentNode
+  else if (document.selection && document.selection.type !== 'Control') {
+    var textRange = document.selection.createRange()
+    var preCaretTextRange = document.body.createTextRange()
+    preCaretTextRange.moveToElementText(element)
+    preCaretTextRange.setEndPoint("EndToEnd", textRange)
+    caretOffset = preCaretTextRange.text.length
+  }
 
-	 if (!selectedNode || !editable.firstChild) {
-			return {
-				caret: 0,
-				line: 0,
-			}
-	 }
-
-	 // select to top of editable
-	 range.setStart(editable.firstChild, 0)
-
-	 // do not use 'this' sel anymore since the selection has changed
-	 const content = window.getSelection().toString()
-	 const text = JSON.stringify(content)
-	 const lines = (text.match(/\\n/g) || []).length + 1
-
-	 // clear selection
-	 window.getSelection().collapseToEnd()
-
-	 // minus 2 because of strange text formatting
-	 return {
-			caret: text.length - 2, 
-			line: lines,
-	 }
+  return caretOffset
 }
 
 export const insertAtCaretPos = (parentEl, insertEl) => {
 	const selection = window.getSelection()
 	const anchorNode = selection.anchorNode
-	const caretPos = getCaretPosition(parentEl).caret
+	const caretPos = getCaretPosition(parentEl)
 
-	if (anchorNode === parentEl) {
-		parentEl.appendChild(insertEl)
-	} else {
-		let anchorCaretPos
-		if (parentEl.firstChild === anchorNode) {
-			anchorCaretPos = caretPos
+	let charCount = 0
+	for (let i = 0; i < parentEl.childNodes.length; i++) {
+		if (parentEl.childNodes[i] === anchorNode) break
+		// console.log('ADDING CHAR LENGTH FROM NODE', parentEl.childNodes[i])
+		if (parentEl.childNodes[i].innerText) {
+			charCount += parentEl.childNodes[i].innerText.length
 		} else {
-			// We need to get a caret position relative to the anchor element
-			// Get a char count of all characters before the anchor node
-			let charCount = 0
-			for (let i = 0; i < parentEl.childNodes.length; i++) {
-				if (parentEl.childNodes[i] === anchorNode) break
-				if (parentEl.childNodes[i].innerText) {
-					charCount += parentEl.childNodes[i].innerText.length
-				} else {
-					charCount += parentEl.childNodes[i].nodeValue.length
-				}
-			}
-			// The relative anchor node will be the absolute caret position minus the charCount
-			anchorCaretPos = caretPos - charCount
+			charCount += parentEl.childNodes[i].nodeValue.length
 		}
-		// We need to insert the highlight El within the text node at the caret position
-		const beforeNode = document.createTextNode(anchorNode.nodeValue.substring(0, anchorCaretPos))
-		const afterNode = document.createTextNode(anchorNode.nodeValue.substring(anchorCaretPos))
-		const nextSibling = anchorNode.nextSibling
-		
-		parentEl.removeChild(anchorNode)
-
-		if (nextSibling) {
-			parentEl.insertBefore(afterNode, nextSibling)
-			parentEl.insertBefore(insertEl, afterNode)
-			parentEl.insertBefore(beforeNode, insertEl)
+	}
+	if (anchorNode === parentEl || charCount === caretPos) {
+		// If at caret position 0 and there are other elements, insert before, else append
+		if (caretPos === 0 && parentEl.firstChild) {
+			parentEl.insertBefore(insertEl, parentEl.firstChild)
 		} else {
-			parentEl.appendChild(beforeNode)
 			parentEl.appendChild(insertEl)
-			parentEl.appendChild(afterNode)
 		}
+		return
+	}
+	let anchorCaretPos
+	if (parentEl.firstChild === anchorNode) {
+		anchorCaretPos = caretPos
+	} else {
+		anchorCaretPos = caretPos - charCount
+	}
+	// We need to insert the highlight El within the text node at the caret position
+	const beforeNode = document.createTextNode(anchorNode.nodeValue.substring(0, anchorCaretPos))
+	const afterNode = document.createTextNode(anchorNode.nodeValue.substring(anchorCaretPos))
+	const nextSibling = anchorNode.nextSibling
+	
+	parentEl.removeChild(anchorNode)
+	console.log('nextSibling', nextSibling)
+	if (nextSibling) {
+		console.log('INSERTING BEFORE --------------- ')
+		parentEl.insertBefore(afterNode, nextSibling)
+		parentEl.insertBefore(insertEl, afterNode)
+		parentEl.insertBefore(beforeNode, insertEl)
+	} else {
+		console.log('APPENDING -------------- ')
+		parentEl.appendChild(beforeNode)
+		parentEl.appendChild(insertEl)
+		parentEl.appendChild(afterNode)
 	}
 }
 

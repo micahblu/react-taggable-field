@@ -46,3 +46,20 @@
 .thingHighlight {
   color: green;
 }
+
+.customTagClass1 {
+  background-color: blue;
+}
+
+.customTagClass2 {
+  background-color: purple;
+}
+
+.customTagClass3 {
+  background-color: orange;
+  color: #333;
+}
+
+.customTagClass4 {
+  background-color: brown;
+}

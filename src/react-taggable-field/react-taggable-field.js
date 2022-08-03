@@ -175,10 +175,6 @@ export default function ReactTaggableField({
 			removeBreaks(inputRef.current)
 			if (e.key === 'Enter' || e.key === 'Tab') e.preventDefault()
       if (e.key === 'Backspace') {
-				const selection = document.getSelection()
-				const anchorNode = selection.anchorNode
-				const lastNode = getLastNode(inputRef.current, anchorNode)
-
 				if (heldKeys.current.slice(-1)[0] === 'Meta') {
 					// remove everything
 					addedTags.current = []
@@ -187,12 +183,10 @@ export default function ReactTaggableField({
 					isMatching.current = false
 					setShowSuggestions(false)
 					return
-				} else if (isMatching.current && lastNode.innerText === triggerSymbol.current) {
-					inputRef.current.removeChild(highlightEl.current)
+				} else if (isMatching.current && highlightEl.current?.innerText.length === 1) {
 					highlightEl.current = null
 					isMatching.current = false
 					setShowSuggestions(false)
-					e.preventDefault()
 				}
 			} else if (triggers.includes(e.key)) {
 				if (isMatching.current) {

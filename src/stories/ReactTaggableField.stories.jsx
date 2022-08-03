@@ -31,16 +31,19 @@ stories.add('ReactTaggableField', () => {
 							highlightClass: 'thingHighlight',
 							tagClass: 'thingTag',
 							suggestions: [
-								{ label: 'amazing', tagClass: 'customTagClass1' },
-								{ label: 'cool', tagClass: 'customTagClass2' },
-								{ label: 'funny', tagClass: 'customTagClass3' },
-								{ label: 'interesting', tagClass: 'customTagClass4' },
-								{ label: 'inspiring', tagClass: 'customTagClass5' }
+								{ label: 'work', tagClass: 'customTagClass1' },
+								{ label: 'Alpha Project', tagClass: 'customTagClass2' },
+								{ label: 'Beta Project', tagClass: 'customTagClass3' },
+								{ label: 'funny', tagClass: 'customTagClass4' },
+								{ label: 'fitness', tagClass: 'customTagClass5' },
+								{ label: 'inspiring', tagClass: 'customTagClass6' }
 							]}, {
 							triggerSymbol: '@',
 							highlightClass: 'peopleHighlight',
 							tagClass: 'peopleTag',
 							suggestions: [
+								{ label: 'Elon Musk' },
+								{ label: 'Mike Tyson' },
 								{ label: 'Albert Einstein' },
 								{ label: 'Richard Feynman' },
 								{ label: 'Nikola Tesla' }

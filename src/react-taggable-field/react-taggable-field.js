@@ -1,5 +1,5 @@
-import React, { useState, useLayoutEffect, useRef, useCallback } from 'react'
-import { removeBreaks, getLastElement, getLastNode, getCaretPosition } from './helpers'
+import React, { useState, useLayoutEffect, useRef, useCallback} from 'react'
+import { removeBreaks, getLastElement, getLastNode, insertAtCaretPos, insertAfter, getCaretPosition } from './helpers'
 import './ReactTaggableField.css'
 
 const HIGHLIGHT_CLASS = 'react-taggable-field-highlight'
@@ -31,32 +31,14 @@ export default function ReactTaggableField({
 
 	const matches = useRef([])
 
-	const autoPositionCaret = () => {
+	const autoPositionCaret = (anchorNode) => {
 		const selection = window.getSelection()
-		// Needed for firefox as caret and focus will be outside of the span element
-		if (highlightEl.current) {
-			highlightEl.current.focus()
-			selection.collapse(highlightEl.current, highlightEl.current.childNodes.length)
-		} else {
-			inputRef.current.focus()
-			selection.collapse(inputRef.current, inputRef.current.childNodes.length)
-		}
+		const anchor = anchorNode ? anchorNode : selection.anchorNode
+		if (!anchor) return
+		selection.collapse(anchor, anchor.childNodes.length)
 	}
 
-	const nodeIsAfter = (nodeAfter, nodeBefore, parentNode) => {
-		let nodeAfterPos = 0
-		let nodeBeforePos = 0
-		for (let i = 0; i < parentNode.childNodes.length; i++) {
-			if (nodeAfter === parentNode.childNodes[i]) {
-				nodeAfterPos = i
-			}
-			else if (nodeBefore === parentNode.childNodes[i]) {
-				nodeBeforePos = i
-			}
-		}
-		return nodeAfterPos > nodeBeforePos
-	}
-
+	// Horizontal scroll into view, for overflow text
 	const scrollIntoView = () => {
 		const lastElement = getLastElement(inputRef.current)
 		 if (lastElement?.scrollIntoView) {
@@ -64,42 +46,61 @@ export default function ReactTaggableField({
 		 }
 	}
 
+	const updateTags = () => {
+		// Update addedTags array
+		const tagElems = inputRef.current.getElementsByClassName(INPUT_TAG_CLASS)
+
+		addedTags.current = []
+		for (let i = 0; i < tagElems.length; i++) {
+			addedTags.current.push({
+				label: tagElems[i].innerText,
+				tagClass: tagElems[i].className.replace(INPUT_TAG_CLASS, '').trim(),
+				triggerSymbol: tagElems[i].getAttribute('data-trigger')
+			})
+		}
+	}
+
 	const addInputTag = useCallback((tag) => {
-		addedTags.current.push({ symbol: triggerSymbol.current, ...tag })
-		const lastNode = getLastNode(inputRef.current)
+		// addedTags.current.push({ symbol: triggerSymbol.current, ...tag })
 		const tagClasses = [INPUT_TAG_CLASS]
-		const globalTagClass = suggestionMap[triggerSymbol.current].tagClass
+		const globalTagClass = suggestionMap[triggerSymbol.current]?.tagClass
 
 		if (globalTagClass) tagClasses.push(globalTagClass)
 		if (tag.tagClass) tagClasses.push(tag.tagClass)
 		
-		const tagHtml = `<span
-				class='${tagClasses.join(' ')}'
-				contenteditable='false'
-			>
-				${tag.label}
-			</span>
-			&ZeroWidthSpace;`
-		// remove highlight el
-		highlightEl.current = null
+		const tagEl = document.createElement('span')
+		tagEl.className = tagClasses.join(' ')
+		tagEl.contentEditable = false
+		tagEl.setAttribute('data-trigger', triggerSymbol.current)
+		tagEl.innerText = tag.label
 
 		// no longer matching
 		isMatching.current = false
 
+		// insert tag after highlight elemetn
+		insertAfter(tagEl, highlightEl.current)
+
+		const anchorTextNode = document.createTextNode('\u200b')
+		insertAfter(anchorTextNode, tagEl)
+
 		// remove highlighted node and replace with tag node
-		inputRef.current.removeChild(lastNode)
-		inputRef.current.innerHTML += tagHtml
+		inputRef.current.removeChild(highlightEl.current)
+
+		// remove highlight el
+		highlightEl.current = null
 
 		setShowSuggestions(false)
 		scrollIntoView()
-		autoPositionCaret()
+		autoPositionCaret(anchorTextNode)
+
+		updateTags()
 	}, [addedTags, suggestionMap])
 
-	const removeHighlight = (lastNode) => {
-		const lastNodeText = lastNode.innerText
+	const removeHighlight = (highlightEl) => {
+		const lastNodeText = highlightEl.innerText
 
 		// remove highlighted node
-		inputRef.current.removeChild(lastNode)
+		inputRef.current.removeChild(highlightEl)
 		highlightEl.current = null
 		isMatching.current = false
 
@@ -120,7 +121,6 @@ export default function ReactTaggableField({
 	useLayoutEffect(() => {
 		if (defaultValue !== undefined) {
 			inputRef.current.innerHTML = defaultValue
-			autoPositionCaret()
 		}
 	}, [defaultValue])
 
@@ -129,14 +129,17 @@ export default function ReactTaggableField({
 			// pop last hit key
 			heldKeys.current = heldKeys.current.filter(k => k !== e.key)
 
+			// update addedTags
+			updateTags()
+
 			if (e.key === 'Tab' || e.key === ' ' || e.key === 'Enter') {
 				const lastNode = getLastNode(inputRef.current)
 				const nodeText = lastNode.innerText?.replace(triggerSymbol.current, '').toLowerCase() || ''
-				if ((lastNode && matches.current.length === 1 && isMatching.current) || matches.current.includes(nodeText)) {
+				if ((matches.current.length === 1 && isMatching.current) || matches.current.includes(nodeText)) {
 					const tag = matches.current.length === 1 ? matches.current[0] : nodeText
 					addInputTag(tag)
-				} else if (lastNode.nodeName !== '#text' && lastNode?.classList?.contains(HIGHLIGHT_CLASS) && matches.current.length === 0) {
-					removeHighlight(lastNode)
+				} else if (isMatching.current && matches.current.length === 0) {
+					removeHighlight(highlightEl.current)
 					if (e.key !== ' ') inputRef.current.appendChild(document.createTextNode('\u00A0'))
 					autoPositionCaret()
 					e.preventDefault()
@@ -153,30 +156,29 @@ export default function ReactTaggableField({
 				}
       }
 			if (isMatching.current && e.key !== triggerSymbol.current) {
-				const inputStr = inputRef.current.innerText
+				const inputStr = highlightEl.current.innerText
 				const symbolIndex = inputStr.lastIndexOf(triggerSymbol.current)
 				const searchStr = inputStr.substr(symbolIndex + 1).replace(/[^\w]/, '')
 				const regex = new RegExp(searchStr, 'i')
+
 				matches.current = suggestionMap[triggerSymbol.current].suggestions.filter((tag) => regex.test(tag.label))
+
 				setMatchingTags(matches.current)
-			} else {
-				onChange({
-					text: inputRef.current.innerText,
-					__html: inputRef.current.innerHTML,
-					tags: addedTags.current
-				})
 			}
+			onChange({
+				text: inputRef.current.innerText,
+				__html: inputRef.current.innerHTML,
+				tags: addedTags.current
+			})
 		}
     const keyDownListener = (e) => {
 			removeBreaks(inputRef.current)
 
 			if (e.key === 'Enter' || e.key === 'Tab') e.preventDefault()
       if (e.key === 'Backspace') {
-				const selection = window.getSelection()
+				const selection = document.getSelection()
 				const anchorNode = selection.anchorNode
 				const lastNode = getLastNode(inputRef.current, anchorNode)
-				const lastElement = getLastElement(inputRef.current, anchorNode)
-				const caretPos = getCaretPosition(inputRef.current)
 
 				if (heldKeys.current.slice(-1)[0] === 'Meta') {
 					// remove everything
@@ -186,15 +188,6 @@ export default function ReactTaggableField({
 					isMatching.current = false
 					setShowSuggestions(false)
 					return
-				} else if (
-					lastElement?.classList?.contains(INPUT_TAG_CLASS) &&
-					lastNode.nodeName === '#text' &&
-					caretPos <= (heldKeys.current.slice(-1)[0] === 'Alt' ? 1 : 0)
-				) {
-					// remove the tag
-					addedTags.current.pop()
-					inputRef.current.removeChild(lastElement || getLastElement(inputRef.current))
-					e.preventDefault()
 				} else if (isMatching.current && lastNode.innerText === triggerSymbol.current) {
 					inputRef.current.removeChild(highlightEl.current)
 					highlightEl.current = null
@@ -220,10 +213,10 @@ export default function ReactTaggableField({
 				highlightEl.current.innerText = triggerSymbol.current
 				highlightEl.current.setAttribute('contentEditable', true)
 
-				inputRef.current.appendChild(highlightEl.current)
+				insertAtCaretPos(inputRef.current, highlightEl.current)
 
         setShowSuggestions(true)
-				autoPositionCaret()
+				autoPositionCaret(highlightEl.current)
 				scrollIntoView()
         e.preventDefault()
 			}

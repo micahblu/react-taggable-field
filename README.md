@@ -15,26 +15,36 @@ npm i react-taggable-field
 <ReactTaggableField
 	autoFocus={true}
 	onChange={({ text, __html, tags}) => {
-		// do something with output
+		setOutput({ text, __html, tags })
 	}}
+	defaultValue={'Hello world'}
+	onSubmit={(output, clear) => {
+		// do something and clear the input
+		setOutput({})
+		clear()
+	}}
+	inputClass='demo-input'
 	tags={[{
 		triggerSymbol: '#',
 		highlightClass: 'thingHighlight',
 		tagClass: 'thingTag',
 		suggestions: [
-			'amazing',
-			'cool',
-			'funny',
-			'interesting',
-			'inspiring'
+			{ label: 'work', tagClass: 'customTagClass1' },
+			{ label: 'Alpha Project', tagClass: 'customTagClass2' },
+			{ label: 'Beta Project', tagClass: 'customTagClass3' },
+			{ label: 'funny', tagClass: 'customTagClass4' },
+			{ label: 'fitness', tagClass: 'customTagClass5' },
+			{ label: 'inspiring', tagClass: 'customTagClass6' }
 		]}, {
 		triggerSymbol: '@',
 		highlightClass: 'peopleHighlight',
 		tagClass: 'peopleTag',
 		suggestions: [
-			'Albert Einstein',
-			'Richard Feynman',
-			'Nikola Tesla'
+			{ label: 'Elon Musk' },
+			{ label: 'Mike Tyson' },
+			{ label: 'Albert Einstein' },
+			{ label: 'Richard Feynman' },
+			{ label: 'Nikola Tesla' }
 		]}
 	]}
 />

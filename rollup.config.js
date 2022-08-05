@@ -21,7 +21,8 @@ const rollupConfig = [
 		plugins: [ 
 			babel({
 				exclude: 'node_modules/**',
-				presets: ['@babel/preset-react']
+				presets: ['@babel/preset-react'],
+				plugins: ['@babel/plugin-proposal-optional-chaining']
 			}),
 			external(),
 			resolve(),

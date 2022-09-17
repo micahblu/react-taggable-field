@@ -31,7 +31,7 @@ stories.add('ReactTaggableField', () => {
 							highlightClass: 'thingHighlight',
 							tagClass: 'thingTag',
 							suggestions: [
-								{ id: 1, label: 'work', tagClass: 'customTagClass1' },
+								{ id: 1, label: 'work', tagClass: 'customTagClass1', style: {background: 'purple'} },
 								{ id: 2, label: 'Alpha Project', tagClass: 'customTagClass2' },
 								{ id: 3, label: 'Beta Project', tagClass: 'customTagClass3' },
 								{ id: 4, label: 'funny', tagClass: 'customTagClass4' },

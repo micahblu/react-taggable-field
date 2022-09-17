@@ -70,8 +70,15 @@ export default function ReactTaggableField({
 
 		if (globalTagClass) tagClasses.push(globalTagClass)
 		if (tag.tagClass) tagClasses.push(tag.tagClass)
-		
+
 		const tagEl = document.createElement('span')
+		
+		if (tag.style) {
+			for (const style in tag.style) {
+				tagEl.style[style] = tag.style[style]
+			}
+		}
+		
 		tagEl.className = tagClasses.join(' ')
 		tagEl.contentEditable = false
 		tagEl.setAttribute('data-trigger', triggerSymbol.current)

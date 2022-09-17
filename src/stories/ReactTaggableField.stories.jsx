@@ -31,12 +31,12 @@ stories.add('ReactTaggableField', () => {
 							highlightClass: 'thingHighlight',
 							tagClass: 'thingTag',
 							suggestions: [
-								{ label: 'work', tagClass: 'customTagClass1' },
-								{ label: 'Alpha Project', tagClass: 'customTagClass2' },
-								{ label: 'Beta Project', tagClass: 'customTagClass3' },
-								{ label: 'funny', tagClass: 'customTagClass4' },
-								{ label: 'fitness', tagClass: 'customTagClass5' },
-								{ label: 'inspiring', tagClass: 'customTagClass6' }
+								{ id: 1, label: 'work', tagClass: 'customTagClass1' },
+								{ id: 2, label: 'Alpha Project', tagClass: 'customTagClass2' },
+								{ id: 3, label: 'Beta Project', tagClass: 'customTagClass3' },
+								{ id: 4, label: 'funny', tagClass: 'customTagClass4' },
+								{ id: 5, label: 'fitness', tagClass: 'customTagClass5' },
+								{ id: 6, label: 'inspiring', tagClass: 'customTagClass6' }
 							]}, {
 							triggerSymbol: '@',
 							highlightClass: 'peopleHighlight',

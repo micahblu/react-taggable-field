@@ -24,10 +24,12 @@ export default function ReactTaggableField({
   const [matchingTags, setMatchingTags] = useState([])
 	const triggers = tags.map(tgroup => tgroup.triggerSymbol)
 	const heldKeys = useRef([])
+
 	const suggestionMap = tags.reduce((acc, tgroup) => {
 		acc[tgroup.triggerSymbol] = { ...tgroup }
 		return acc
 	}, {})
+
 
 	const matches = useRef([])
 
@@ -46,19 +48,20 @@ export default function ReactTaggableField({
 		 }
 	}
 
-	const updateTags = () => {
+	const updateTags = useCallback(() => {
 		// Update addedTags array
 		const tagElems = inputRef.current.getElementsByClassName(INPUT_TAG_CLASS)
 
 		addedTags.current = []
 		for (let i = 0; i < tagElems.length; i++) {
+			let trigger = tagElems[i].getAttribute('data-trigger')
+			let tag = suggestionMap[trigger].suggestions.find(tag => tag.label === tagElems[i].innerText)
 			addedTags.current.push({
-				label: tagElems[i].innerText,
-				tagClass: tagElems[i].className.replace(INPUT_TAG_CLASS, '').trim(),
+				...tag,
 				triggerSymbol: tagElems[i].getAttribute('data-trigger')
 			})
 		}
-	}
+	}, [suggestionMap])
 
 	const addInputTag = useCallback((tag) => {
 		// addedTags.current.push({ symbol: triggerSymbol.current, ...tag })
@@ -94,7 +97,7 @@ export default function ReactTaggableField({
 		autoPositionCaret(anchorTextNode)
 
 		updateTags()
-	}, [addedTags, suggestionMap])
+	}, [updateTags, suggestionMap])
 
 	const removeHighlight = () => {
 		// Add text node
@@ -140,9 +143,7 @@ export default function ReactTaggableField({
 					addInputTag(tag)
 				} else if (isMatching.current && matches.current.length === 0) {
 					removeHighlight()
-					// if (e.key !== ' ') inputRef.current.appendChild(document.createTextNode('\u00A0'))
-					autoPositionCaret()
-					// e.preventDefault()
+					autoPositionCaret(inputRef.current)
 				} else if (e.key === 'Enter') {
 					onSubmit({
 						text: inputRef.current.innerText,
@@ -222,7 +223,7 @@ export default function ReactTaggableField({
       document.removeEventListener('keydown', keyDownListener)
       document.removeEventListener('keyup', keyUpListener)
     }
-  }, [addInputTag, tags, triggers, onChange, suggestionMap, onSubmit])
+  }, [addInputTag, updateTags, tags, triggers, onChange, suggestionMap, onSubmit])
 
   return (
     <div className='react-taggable-field'>

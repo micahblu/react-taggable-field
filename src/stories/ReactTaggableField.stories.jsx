@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { storiesOf } from '@storybook/react'
 import ReactTaggableField from '../react-taggable-field/react-taggable-field'
 import './DemoStyles.css'
@@ -7,6 +7,7 @@ const stories = storiesOf('React Taggable Field Test', module)
  
 stories.add('ReactTaggableField', () => {
 	const [output, setOutput] = useState({})
+	const clearField = useRef()
 	return (
 		<div className='Demo'>
 			<header className='Demo-header'>
@@ -20,10 +21,14 @@ stories.add('ReactTaggableField', () => {
 							setOutput({ text, __html, tags })
 						}}
 						defaultValue={'Hello world'}
-						onSubmit={(output, clear) => {
+						onInit={(inputRef, clear) => {
+							// Passing control of clearing the field to the consumer of the component
+							clearField.current = clear
+						}}
+						onSubmit={(output) => {
 							// do something and clear the input
 							setOutput({})
-							clear()
+							clearField.current()
 						}}
 						inputClass='demo-input'
 						tags={[{
@@ -50,6 +55,15 @@ stories.add('ReactTaggableField', () => {
 							]}
 						]}
 					/>
+					<button
+						onClick={() => {
+							clearField.current()
+							setOutput({})
+							console.log(output.__html)
+						}}
+					>
+						Clear
+					</button>
 				</div>
 
 				<div className='demo-output'>
@@ -57,7 +71,7 @@ stories.add('ReactTaggableField', () => {
 					<div>{output.text}</div>
 
 					<label>Html</label>
-					<textarea value={output.__html} />
+					<textarea value={output.__html || ''} />
 
 					<label>Tags</label>
 					<div>{output.tags?.map(t => t.label).join(', ')}</div>

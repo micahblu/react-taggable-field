@@ -13,7 +13,8 @@ export default function ReactTaggableField({
 	disabled = false,
 	inputClass,
 	suggestionClass,
-	onSubmit
+	onSubmit,
+	onInit
 }) {
   const inputRef = useRef()
 	const isMatching = useRef(false) 
@@ -30,6 +31,14 @@ export default function ReactTaggableField({
 		return acc
 	}, {})
 
+	const clear = () => {
+		// return a clear method
+		inputRef.current.innerHTML = ''
+		addedTags.current = []
+	}
+
+	// Pass back the inputRef and clear method
+	if (onInit) onInit(inputRef, clear)
 
 	const matches = useRef([])
 
@@ -156,10 +165,6 @@ export default function ReactTaggableField({
 						text: inputRef.current.innerText,
 						__html: inputRef.current.innerHTML,
 						tags: addedTags.current
-					}, () => {
-						// return a clear method
-						inputRef.current.innerHTML = ''
-						addedTags.current = []
 					})
 				}
       }

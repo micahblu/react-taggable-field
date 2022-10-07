@@ -229,11 +229,14 @@ export default function ReactTaggableField({
 
 			heldKeys.current.push(e.key)
     }
-    document.addEventListener('keydown', keyDownListener)
-    document.addEventListener('keyup', keyUpListener)
+    inputRef.current.addEventListener('keydown', keyDownListener)
+    inputRef.current.addEventListener('keyup', keyUpListener)
+
+		// used in the clean up function as inputRef.current is likely to be destroyed
+		const inputRefClone = inputRef.current
     return () => {
-      document.removeEventListener('keydown', keyDownListener)
-      document.removeEventListener('keyup', keyUpListener)
+			inputRefClone.removeEventListener('keydown', keyDownListener)
+      inputRefClone.removeEventListener('keyup', keyUpListener)
     }
   }, [addInputTag, updateTags, tags, triggers, onChange, suggestionMap, onSubmit])
 

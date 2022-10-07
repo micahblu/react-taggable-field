@@ -153,14 +153,14 @@ export default function ReactTaggableField({
 
 			if (e.key === 'Tab' || e.key === ' ' || e.key === 'Enter') {
 				const lastNode = getLastNode(inputRef.current)
-				const nodeText = lastNode.innerText?.replace(triggerSymbol.current, '').toLowerCase() || ''
+				const nodeText = lastNode?.innerText?.replace(triggerSymbol.current, '').toLowerCase() || ''
 				if ((matches.current.length === 1 && isMatching.current) || matches.current.includes(nodeText)) {
 					const tag = matches.current.length === 1 ? matches.current[0] : nodeText
 					addInputTag(tag)
 				} else if (isMatching.current && matches.current.length === 0) {
 					removeHighlight()
 					autoPositionCaret(inputRef.current)
-				} else if (e.key === 'Enter') {
+				} else if (e.key === 'Enter' && onSubmit) {
 					onSubmit({
 						text: inputRef.current.innerText,
 						__html: inputRef.current.innerHTML,

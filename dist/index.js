@@ -1614,7 +1614,7 @@ var ReactTaggableField = ({
   };
   const scrollIntoView = () => {
     const lastElement = getLastElement(inputRef.current);
-    if (lastElement?.scrollIntoView) {
+    if (lastElement == null ? void 0 : lastElement.scrollIntoView) {
       lastElement.scrollIntoView();
     }
   };
@@ -1631,8 +1631,9 @@ var ReactTaggableField = ({
     }
   }, [suggestionMap]);
   const addInputTag = (0, import_react.useCallback)((tag) => {
+    var _a;
     const tagClasses = [INPUT_TAG_CLASS];
-    const globalTagClass = suggestionMap[triggerSymbol.current]?.tagClass;
+    const globalTagClass = (_a = suggestionMap[triggerSymbol.current]) == null ? void 0 : _a.tagClass;
     if (globalTagClass)
       tagClasses.push(globalTagClass);
     if (tag.tagClass)
@@ -1679,11 +1680,12 @@ var ReactTaggableField = ({
   }, [defaultValue]);
   (0, import_react.useLayoutEffect)(() => {
     const keyUpListener = (e) => {
+      var _a;
       heldKeys.current = heldKeys.current.filter((k) => k !== e.key);
       updateTags();
       if (e.key === "Tab" || e.key === " " || e.key === "Enter") {
         const lastNode = getLastNode(inputRef.current);
-        const nodeText = lastNode?.innerText?.replace(triggerSymbol.current, "").toLowerCase() || "";
+        const nodeText = ((_a = lastNode == null ? void 0 : lastNode.innerText) == null ? void 0 : _a.replace(triggerSymbol.current, "").toLowerCase()) || "";
         if (matches.current.length === 1 && isMatching.current || matches.current.includes(nodeText)) {
           const tag = matches.current.length === 1 ? matches.current[0] : nodeText;
           addInputTag(tag);
@@ -1713,6 +1715,7 @@ var ReactTaggableField = ({
       });
     };
     const keyDownListener = (e) => {
+      var _a;
       removeBreaks(inputRef.current);
       if (e.key === "Enter" || e.key === "Tab")
         e.preventDefault();
@@ -1723,7 +1726,7 @@ var ReactTaggableField = ({
           isMatching.current = false;
           setShowSuggestions(false);
           return;
-        } else if (isMatching.current && highlightEl.current?.innerText.length === 1) {
+        } else if (isMatching.current && ((_a = highlightEl.current) == null ? void 0 : _a.innerText.length) === 1) {
           highlightEl.current = null;
           isMatching.current = false;
           setShowSuggestions(false);

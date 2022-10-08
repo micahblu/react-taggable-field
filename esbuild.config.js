@@ -6,6 +6,7 @@ esbuild.build({
   bundle: true,
   outfile: 'dist/index.js',
 	format: 'esm',
+	target: 'chrome79',
 	plugins: [
 		InlineCSSPlugin()
 	]

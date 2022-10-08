@@ -1,7 +1,7 @@
 {
   "name": "react-taggable-field",
   "description": "React taggable field makes inlining tags in an editable input easy and intuitive",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "author": "Micah Blu",
   "license": "MIT",
   "private": false,

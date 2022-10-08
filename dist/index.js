@@ -165,11 +165,8 @@ var insertAfter = (newNode, existingNode) => {
 // src/react-taggable-field/react-taggable-field.jsx
 var HIGHLIGHT_CLASS = "react-taggable-field-highlight";
 var INPUT_TAG_CLASS = "react-taggable-field-input-tag";
-var rtfContext = {
-  clear: null,
-  inputRef: null
-};
 var ReactTaggableField = ({
+  clearRef,
   tags,
   onChange,
   autoFocus = false,
@@ -193,12 +190,10 @@ var ReactTaggableField = ({
     acc[tgroup.triggerSymbol] = { ...tgroup };
     return acc;
   }, {});
-  const clear = () => {
+  clearRef.current = () => {
     inputRef.current.innerHTML = "";
     addedTags.current = [];
   };
-  rtfContext.clear = clear;
-  rtfContext.inputRef = inputRef;
   const matches = useRef([]);
   const autoPositionCaret = (anchorNode) => {
     const selection = window.getSelection();
@@ -374,6 +369,5 @@ var ReactTaggableField = ({
 };
 var react_taggable_field_default = ReactTaggableField;
 export {
-  react_taggable_field_default as default,
-  rtfContext
+  react_taggable_field_default as default
 };

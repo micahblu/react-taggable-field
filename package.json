@@ -22,7 +22,8 @@
     "@storybook/react": "^6.5.9",
     "@storybook/testing-library": "^0.0.13",
     "babel-loader": "^8.2.5",
-    "rollup": "^2.75.7",
+    "esbuild": "^0.15.10",
+    "esbuild-plugin-inline-css": "^0.0.1",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-postcss": "^4.0.2",
@@ -43,6 +44,6 @@
   "scripts": {
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
-    "build": "rollup -c"
+    "build": "node esbuild.config.js"
   }
 }

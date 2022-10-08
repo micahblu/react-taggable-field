@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { storiesOf } from '@storybook/react'
 import ReactTaggableField, { rtfContext } from '../react-taggable-field/react-taggable-field'
 import './DemoStyles.css'

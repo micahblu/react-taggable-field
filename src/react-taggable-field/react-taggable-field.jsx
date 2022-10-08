@@ -10,7 +10,7 @@ export const rtfContext = {
 	inputRef: null
 }
 
-export default function ReactTaggableField({
+const ReactTaggableField = ({
 	tags,
 	onChange,
 	autoFocus = false,
@@ -20,7 +20,7 @@ export default function ReactTaggableField({
 	inputClass,
 	suggestionClass,
 	onSubmit
-}) {
+}) => {
   const inputRef = useRef()
 	const isMatching = useRef(false) 
 	const highlightEl = useRef(null)
@@ -268,3 +268,5 @@ export default function ReactTaggableField({
 		</div>
   )
 }
+
+export default ReactTaggableField

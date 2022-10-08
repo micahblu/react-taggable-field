@@ -46,3 +46,11 @@ react-taggable-field-container {
   border-radius: 5px;
   display: inline-block;
 }
+
+[contenteditable=true]:empty:before {
+  content: attr(placeholder);
+  pointer-events: none;
+  display: block; /* For Firefox */
+  color: #777;
+  font-style: italic;
+}

@@ -1,13 +1,12 @@
 import { useState, useRef } from 'react'
 import { storiesOf } from '@storybook/react'
-import ReactTaggableField from '../react-taggable-field/react-taggable-field'
+import ReactTaggableField, { rtfContext } from '../react-taggable-field/react-taggable-field'
 import './DemoStyles.css'
 
 const stories = storiesOf('React Taggable Field Test', module)
  
 stories.add('ReactTaggableField', () => {
 	const [output, setOutput] = useState({})
-	const clearField = useRef()
 	return (
 		<div className='Demo'>
 			<header className='Demo-header'>
@@ -20,15 +19,12 @@ stories.add('ReactTaggableField', () => {
 						onChange={({ text, __html, tags}) => {
 							setOutput({ text, __html, tags })
 						}}
-						defaultValue={'Hello world'}
-						onInit={(inputRef, clear) => {
-							// Passing control of clearing the field to the consumer of the component
-							clearField.current = clear
-						}}
+						defaultValue={''}
+						placeHolder='Write away'
 						onSubmit={(output) => {
 							// do something and clear the input
 							setOutput({})
-							clearField.current()
+							rtfContext.clear()
 						}}
 						inputClass='demo-input'
 						tags={[{
@@ -57,7 +53,7 @@ stories.add('ReactTaggableField', () => {
 					/>
 					<button
 						onClick={() => {
-							clearField.current()
+							rtfContext.clear()
 							setOutput({})
 							console.log(output.__html)
 						}}

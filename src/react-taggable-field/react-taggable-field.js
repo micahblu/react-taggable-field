@@ -1,20 +1,25 @@
-import React, { useState, useLayoutEffect, useRef, useCallback} from 'react'
+import React, { useState, useLayoutEffect, useRef, useCallback } from 'react'
 import { removeBreaks, getLastElement, getLastNode, insertAtCaretPos, insertAfter } from './helpers'
 import './ReactTaggableField.css'
 
 const HIGHLIGHT_CLASS = 'react-taggable-field-highlight'
 const INPUT_TAG_CLASS = 'react-taggable-field-input-tag'
 
+export const rtfContext = {
+	clear: null,
+	inputRef: null
+}
+
 export default function ReactTaggableField({
 	tags,
 	onChange,
 	autoFocus = false,
 	defaultValue,
+	placeHolder = '',
 	disabled = false,
 	inputClass,
 	suggestionClass,
-	onSubmit,
-	onInit
+	onSubmit
 }) {
   const inputRef = useRef()
 	const isMatching = useRef(false) 
@@ -32,13 +37,14 @@ export default function ReactTaggableField({
 	}, {})
 
 	const clear = () => {
-		// return a clear method
 		inputRef.current.innerHTML = ''
 		addedTags.current = []
 	}
 
-	// Pass back the inputRef and clear method
-	if (onInit) onInit(inputRef, clear)
+	// assign clear to exported context
+	rtfContext.clear = clear
+	// assign input ref to exported context
+	rtfContext.inputRef = inputRef
 
 	const matches = useRef([])
 
@@ -241,23 +247,24 @@ export default function ReactTaggableField({
   }, [addInputTag, updateTags, tags, triggers, onChange, suggestionMap, onSubmit])
 
   return (
-    <div className='react-taggable-field'>
-      <div className='react-taggable-field-container'>
-        <div
-          className={`react-taggable-field-input ${inputClass}`}
-          ref={inputRef}
-          contentEditable
-        />
-      </div>
-      {showSuggestions && (
-        <div className={`react-taggable-field-suggested-tags ${suggestionClass}`}>
-          {matchingTags.map((tag) => (
-            <div onClick={() => addInputTag(tag)} key={tag.label} className='react-taggable-field-suggested-tag'>
-              { tag.label }
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+		<div className='react-taggable-field'>
+			<div className='react-taggable-field-container'>
+				<div
+					placeholder={placeHolder}
+					className={`react-taggable-field-input ${inputClass}`}
+					ref={inputRef}
+					contentEditable
+				/>
+			</div>
+			{showSuggestions && (
+				<div className={`react-taggable-field-suggested-tags ${suggestionClass}`}>
+					{matchingTags.map((tag) => (
+						<div onClick={() => addInputTag(tag)} key={tag.label} className='react-taggable-field-suggested-tag'>
+							{ tag.label }
+						</div>
+					))}
+				</div>
+			)}
+		</div>
   )
 }

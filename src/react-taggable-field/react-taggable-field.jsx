@@ -5,12 +5,8 @@ import './ReactTaggableField.css'
 const HIGHLIGHT_CLASS = 'react-taggable-field-highlight'
 const INPUT_TAG_CLASS = 'react-taggable-field-input-tag'
 
-export const rtfContext = {
-	clear: null,
-	inputRef: null
-}
-
 const ReactTaggableField = ({
+	clearRef,
 	tags,
 	onChange,
 	autoFocus = false,
@@ -36,15 +32,10 @@ const ReactTaggableField = ({
 		return acc
 	}, {})
 
-	const clear = () => {
+	clearRef.current = () => {
 		inputRef.current.innerHTML = ''
 		addedTags.current = []
 	}
-
-	// assign clear to exported context
-	rtfContext.clear = clear
-	// assign input ref to exported context
-	rtfContext.inputRef = inputRef
 
 	const matches = useRef([])
 

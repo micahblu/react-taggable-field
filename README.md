@@ -10,18 +10,24 @@ ReactTaggableField is a react component that allows for inlining tag labels in a
 npm i react-taggable-field
 ```
 ### Usage
+React Taggable Field is an uncontrolled input, so to clear the input from say a submit button you'll need to create a ref and pass it as the clearRef prop of the React Taggable Field component that will have a clear method assigned to it.
+
+```js
+const rftClear = useRef()
+```
 
 ```js
 <ReactTaggableField
+	clearRef={rtfClear}
 	autoFocus={true}
 	onChange={({ text, __html, tags}) => {
-		setOutput({ text, __html, tags })
+		// do something on change
 	}}
-	defaultValue={'Hello world'}
-	onSubmit={(output, clear) => {
+	defaultValue={''}
+	placeHolder='Write away'
+	onSubmit={({ text, __html, tags}) => {
 		// do something and clear the input
-		setOutput({})
-		clear()
+		rtfClear.current()
 	}}
 	inputClass='demo-input'
 	tags={[{
@@ -29,12 +35,12 @@ npm i react-taggable-field
 		highlightClass: 'thingHighlight',
 		tagClass: 'thingTag',
 		suggestions: [
-			{ label: 'work', tagClass: 'customTagClass1' },
-			{ label: 'Alpha Project', tagClass: 'customTagClass2' },
-			{ label: 'Beta Project', tagClass: 'customTagClass3' },
-			{ label: 'funny', tagClass: 'customTagClass4' },
-			{ label: 'fitness', tagClass: 'customTagClass5' },
-			{ label: 'inspiring', tagClass: 'customTagClass6' }
+			{ id: 1, label: 'work', tagClass: 'customTagClass1', style: {background: 'purple'} },
+			{ id: 2, label: 'Alpha Project', tagClass: 'customTagClass2' },
+			{ id: 3, label: 'Beta Project', tagClass: 'customTagClass3' },
+			{ id: 4, label: 'funny', tagClass: 'customTagClass4' },
+			{ id: 5, label: 'fitness', tagClass: 'customTagClass5' },
+			{ id: 6, label: 'inspiring', tagClass: 'customTagClass6' }
 		]}, {
 		triggerSymbol: '@',
 		highlightClass: 'peopleHighlight',
@@ -48,6 +54,11 @@ npm i react-taggable-field
 		]}
 	]}
 />
+<button
+	onClick={() => {
+		rtfClear.current()
+	}}
+>
 ```
 
 ### Why
